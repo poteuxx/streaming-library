@@ -627,10 +627,11 @@
           <div class="server-selector">
             <label for="serverSelect" data-i18n="label_server">Serveur:</label>
             <select id="serverSelect" class="server-select" onchange="changeServer()">
-              <option value="me" data-i18n="server_auto">Serveur 1 (VidSrc.me)</option>
-              <option value="net">Serveur 2 (VidSrc.net)</option>
-              <option value="to">Serveur 3 (VidSrc.to)</option>
-              <option value="cc">Serveur 4 (VidSrc.cc - Strict)</option>
+              <option value="vl" data-i18n="server_auto">Serveur 1 (VF / Multi-Audio)</option>
+              <option value="me">Serveur 2 (VidSrc.me)</option>
+              <option value="net">Serveur 3 (VidSrc.net)</option>
+              <option value="to">Serveur 4 (VidSrc.to)</option>
+              <option value="cc">Serveur 5 (VidSrc.cc - Strict)</option>
             </select>
           </div>
         </div>
@@ -983,11 +984,13 @@
             
             // Construct robust, universally working players across multiple totally isolated hosts
             if (item.type === "series") {
+               item.servers.vl = `https://vidlink.pro/tv/${tmdbId}`;
                item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/tv/${tmdbId}`;
                item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}`;
             } else {
+               item.servers.vl = `https://vidlink.pro/movie/${tmdbId}`;
                item.servers.me = `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/movie?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/movie/${tmdbId}`;
@@ -995,14 +998,14 @@
             }
             
             // Set default server
-            item.servers.auto = item.servers.me;
+            item.servers.auto = item.servers.vl;
         } catch(e) {
            item.servers.auto = "error";
         }
       }
 
       document.getElementById('playerTitle').innerText = item.title;
-      serverSelect.value = 'me';
+      serverSelect.value = 'vl';
       updatePlayerSource();
     }
 
