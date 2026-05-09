@@ -627,11 +627,20 @@
           <div class="server-selector">
             <label for="serverSelect" data-i18n="label_server">Serveur:</label>
             <select id="serverSelect" class="server-select" onchange="changeServer()">
-              <option value="vl" data-i18n="server_auto">Serveur 1 (VF / Multi-Audio)</option>
-              <option value="me">Serveur 2 (VidSrc.me)</option>
-              <option value="net">Serveur 3 (VidSrc.net)</option>
-              <option value="to">Serveur 4 (VidSrc.to)</option>
-              <option value="cc">Serveur 5 (VidSrc.cc - Strict)</option>
+              <option value="vl" data-i18n="server_auto">Serveur 1 (VF / 100% French Audio)</option>
+              <option value="vl2">Serveur 2 (Multi-Audio / AutoEmbed)</option>
+              <option value="me">Serveur 3 (VidSrc.me - VOSTFR/EN)</option>
+              <option value="net">Serveur 4 (VidSrc.net - VOSTFR/EN)</option>
+              <option value="to">Serveur 5 (VidSrc.to - VOSTFR/EN)</option>
+              <option value="cc">Serveur 6 (VidSrc.cc - VOSTFR/EN)</option>
+              <option value="pro">Serveur 7 (VidSrc.pro - VOSTFR/EN)</option>
+              <option value="pm">Serveur 8 (VidSrc.pm - VOSTFR/EN)</option>
+              <option value="xyz">Serveur 9 (VidSrc.xyz - VOSTFR/EN)</option>
+              <option value="in">Serveur 10 (VidSrc.in - VOSTFR/EN)</option>
+              <option value="multiembed">Serveur 11 (MultiEmbed.mov - VOSTFR/EN)</option>
+              <option value="vidlink">Serveur 12 (VidLink.pro - VOSTFR/EN)</option>
+              <option value="embedsu">Serveur 13 (Embed.su - VOSTFR/EN)</option>
+              <option value="twoembed">Serveur 14 (2Embed.cc - VOSTFR/EN)</option>
             </select>
           </div>
         </div>
@@ -751,52 +760,50 @@
         document.getElementById('heroTitle').innerText = "Chargement Séries & Films...";
         
         const apiKey = "15d2ea6d0dc1d476efbca3eba2b9bbfb";
-        const movieUrl = `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}&language=fr-FR`;
-        const tvUrl = `https://api.themoviedb.org/3/trending/tv/week?api_key=${apiKey}&language=fr-FR`;
+        
+        let fetchPromises = [];
+        for (let i = 1; i <= 3; i++) { // Fetch 3 pages of each category
+           fetchPromises.push(fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}&language=fr-FR&page=${i}`).then(r => r.json()));
+           fetchPromises.push(fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${apiKey}&language=fr-FR&page=${i}`).then(r => r.json()));
+           fetchPromises.push(fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=fr-FR&page=${i}`).then(r => r.json()));
+           fetchPromises.push(fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=fr-FR&page=${i}`).then(r => r.json()));
+        }
         
         contentDB = [];
+        const responses = await Promise.all(fetchPromises);
         
-        const [movieRes, tvRes] = await Promise.all([
-           fetch(movieUrl).then(r => r.json()),
-           fetch(tvUrl).then(r => r.json())
-        ]);
-
         let combined = [];
+        const seenIds = new Set();
         
-        if (movieRes.results) {
-           movieRes.results.forEach(m => {
-              combined.push({
-                 id: contentDB.length + combined.length,
-                 tmdbId: m.id,
-                 type: "movie",
-                 title: m.title || m.original_title,
-                 desc: { fr: m.overview || "Aucune description.", en: m.overview || "No description." },
-                 genre: ["Action"], // can map real genres later
-                 thumb: `https://image.tmdb.org/t/p/w500${m.poster_path}`,
-                 backdrop: `https://image.tmdb.org/t/p/original${m.backdrop_path}`,
-                 year: m.release_date ? m.release_date.split('-')[0] : new Date().getFullYear(),
-                 servers: { auto: null }
+        responses.forEach(res => {
+           if (res.results) {
+              res.results.forEach(item => {
+                 // TMDB IDs can overlap between movies and tv, use a compound key
+                 const isMovie = item.title !== undefined;
+                 const type = isMovie ? "movie" : "series";
+                 const uniqueKey = `${type}_${item.id}`;
+                 
+                 if (!seenIds.has(uniqueKey) && item.poster_path && item.backdrop_path) {
+                    seenIds.add(uniqueKey);
+                    combined.push({
+                       id: contentDB.length + combined.length,
+                       tmdbId: item.id,
+                       type: type,
+                       title: isMovie ? (item.title || item.original_title) : (item.name || item.original_name),
+                       desc: { fr: item.overview || "Aucune description.", en: item.overview || "No description." },
+                       genre: ["Action"], // can map real genres later
+                       thumb: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                       backdrop: `https://image.tmdb.org/t/p/original${item.backdrop_path}`,
+                       year: isMovie 
+                          ? (item.release_date ? item.release_date.split('-')[0] : new Date().getFullYear())
+                          : (item.first_air_date ? item.first_air_date.split('-')[0] : new Date().getFullYear()),
+                       servers: { auto: null }
+                    });
+                 }
               });
-           });
-        }
+           }
+        });
 
-        if (tvRes.results) {
-           tvRes.results.forEach(t => {
-              combined.push({
-                 id: contentDB.length + combined.length,
-                 tmdbId: t.id,
-                 type: "series",
-                 title: t.name || t.original_name,
-                 desc: { fr: t.overview || "Aucune description.", en: t.overview || "No description." },
-                 genre: ["Action"], 
-                 thumb: `https://image.tmdb.org/t/p/w500${t.poster_path}`,
-                 backdrop: `https://image.tmdb.org/t/p/original${t.backdrop_path}`,
-                 year: t.first_air_date ? t.first_air_date.split('-')[0] : new Date().getFullYear(),
-                 servers: { auto: null }
-              });
-           });
-        }
-        
         // Shuffle the array to mix movies and series
         combined = combined.sort(() => Math.random() - 0.5);
         contentDB = combined;
@@ -985,17 +992,35 @@
             
             // Construct robust, universally working players across multiple totally isolated hosts
             if (item.type === "series") {
-               item.servers.vl = `https://autoembed.co/tv/tmdb/${tmdbId}`;
+               item.servers.vl = `https://frembed.pro/api/serie.php?id=${tmdbId}&s=1&e=1`;
+               item.servers.vl2 = `https://autoembed.co/tv/tmdb/${tmdbId}?lang=fr`;
                item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/tv/${tmdbId}`;
                item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}`;
+               item.servers.pro = `https://vidsrc.pro/embed/tv/${tmdbId}`;
+               item.servers.pm = `https://vidsrc.pm/embed/tv?tmdb=${tmdbId}`;
+               item.servers.xyz = `https://vidsrc.xyz/embed/tv?tmdb=${tmdbId}`;
+               item.servers.in = `https://vidsrc.in/embed/tv?tmdb=${tmdbId}`;
+               item.servers.multiembed = `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1&s=1&e=1`;
+               item.servers.vidlink = `https://vidlink.pro/tv/${tmdbId}/1/1`;
+               item.servers.embedsu = `https://embed.su/embed/tv/${tmdbId}/1/1`;
+               item.servers.twoembed = `https://2embed.cc/embedtv/${tmdbId}&s=1&e=1`;
             } else {
-               item.servers.vl = `https://autoembed.co/movie/tmdb/${tmdbId}`;
+               item.servers.vl = `https://frembed.pro/api/film.php?id=${tmdbId}`;
+               item.servers.vl2 = `https://autoembed.co/movie/tmdb/${tmdbId}?lang=fr`;
                item.servers.me = `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/movie?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/movie/${tmdbId}`;
                item.servers.cc = `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
+               item.servers.pro = `https://vidsrc.pro/embed/movie/${tmdbId}`;
+               item.servers.pm = `https://vidsrc.pm/embed/movie?tmdb=${tmdbId}`;
+               item.servers.xyz = `https://vidsrc.xyz/embed/movie?tmdb=${tmdbId}`;
+               item.servers.in = `https://vidsrc.in/embed/movie?tmdb=${tmdbId}`;
+               item.servers.multiembed = `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1`;
+               item.servers.vidlink = `https://vidlink.pro/movie/${tmdbId}`;
+               item.servers.embedsu = `https://embed.su/embed/movie/${tmdbId}`;
+               item.servers.twoembed = `https://2embed.cc/embed/${tmdbId}`;
             }
             
             // Set default server
