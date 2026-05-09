@@ -1035,11 +1035,6 @@
              heroHoverTimeout = setTimeout(() => {
                  if(heroMovie.id !== item.id) {
                      setHeroMovi(item);
-                     
-                     // Smooth scroll to top if hero is out of view
-                     if(window.scrollY > 300) {
-                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                     }
                  }
              }, 350); 
         };
