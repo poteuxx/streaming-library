@@ -643,27 +643,26 @@
 
   .server-grid {
     display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding: 10px 15px;
-    background: rgba(0,0,0,0.4);
-    scrollbar-width: thin;
-    scrollbar-color: #E50914 transparent;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.5);
+    max-height: 80px;
+    overflow-y: auto;
   }
 
   .server-btn {
     flex: 0 0 auto;
-    background: #181818;
-    border: 1px solid rgba(255,255,255,0.1);
-    color: #e5e5e5;
-    padding: 6px 12px;
-    border-radius: 4px;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #ccc;
+    padding: 4px 8px;
+    border-radius: 2px;
     cursor: pointer;
-    font-size: 9.5px;
+    font-size: 8px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
-    transition: all 0.2s ease;
+    transition: 0.2s;
     white-space: nowrap;
   }
 
@@ -682,14 +681,12 @@
     background: var(--netflix-red);
     color: white;
     border: none;
-    padding: 6px 10px;
-    border-radius: 4px;
-    font-size: 9.5px;
+    padding: 4px 8px;
+    border-radius: 2px;
+    font-size: 8px;
     font-weight: 900;
     cursor: pointer;
-    text-transform: uppercase;
-    margin-left: 10px;
-    transition: 0.3s;
+    margin-left: 5px;
     flex-shrink: 0;
   }
 
@@ -876,8 +873,9 @@
         <div class="player-loader" id="playerLoader"></div>
         <iframe id="playerIframe" 
                 allowfullscreen 
-                allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
-                referrerpolicy="no-referrer"
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
+                referrerpolicy="origin"
                 src="">
         </iframe>
       </div>
