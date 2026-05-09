@@ -627,9 +627,9 @@
           <div class="server-selector">
             <label for="serverSelect" data-i18n="label_server">Serveur:</label>
             <select id="serverSelect" class="server-select" onchange="changeServer()">
-              <option value="su" data-i18n="server_auto">Serveur 1 (Stable)</option>
-              <option value="xyz">Serveur 2 (Backup)</option>
-              <option value="cc">Serveur 3 (Alt)</option>
+              <option value="cc" data-i18n="server_auto">Serveur 1 (Vidsrc.cc)</option>
+              <option value="net">Serveur 2 (Vidsrc.net)</option>
+              <option value="su">Serveur 3 (Embed.su)</option>
             </select>
           </div>
         </div>
@@ -637,9 +637,8 @@
       </div>
 
       <div class="iframe-container">
-        <!-- Using sandbox attribute with essential permissions for modern players -->
+        <!-- Sandbox removed: Streaming providers actively block playback if a sandbox is detected -->
         <iframe id="playerIframe" 
-                sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-forms" 
                 allowfullscreen 
                 src="">
         </iframe>
@@ -986,17 +985,17 @@
             
             // Construct robust, universally working players across multiple hosts
             if (item.type === "series" || match.media_type === "tv") {
-               item.servers.su = `https://embed.su/embed/tv/${tmdbId}/1/1`;
-               item.servers.xyz = `https://vidsrc.xyz/embed/tv?tmdb=${tmdbId}&season=1&episode=1`;
                item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}/1/1`;
+               item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}&season=1&episode=1`;
+               item.servers.su = `https://embed.su/embed/tv/${tmdbId}/1/1`;
             } else {
-               item.servers.su = `https://embed.su/embed/movie/${tmdbId}`;
-               item.servers.xyz = `https://vidsrc.xyz/embed/movie?tmdb=${tmdbId}`;
                item.servers.cc = `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
+               item.servers.net = `https://vidsrc.net/embed/movie?tmdb=${tmdbId}`;
+               item.servers.su = `https://embed.su/embed/movie/${tmdbId}`;
             }
             
-            // Set default server
-            item.servers.auto = item.servers.su;
+            // Set default server to cc since it clears French ISP blocks
+            item.servers.auto = item.servers.cc;
           } else {
              item.servers.auto = "error";
           }
@@ -1006,7 +1005,7 @@
       }
 
       document.getElementById('playerTitle').innerText = item.title;
-      serverSelect.value = 'su';
+      serverSelect.value = 'cc';
       updatePlayerSource();
     }
 
