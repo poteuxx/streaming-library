@@ -157,6 +157,7 @@
     align-items: flex-end;
     padding: 80px 40px;
     transition: background-image 0.5s ease;
+    overflow: hidden;
   }
 
   .hero::after {
@@ -164,6 +165,8 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(0deg, var(--bg-main) 0%, rgba(11,12,15,0.4) 50%, rgba(11,12,15,0.8) 100%);
+    z-index: 2;
+    pointer-events: none;
   }
 
   .hero-content {
@@ -888,12 +891,48 @@
       fetchCatalogData();
     }
 
+    let heroHoverTimeout;
+
     function setHeroMovi(item) {
       if(!item) return;
       heroMovie = item;
-      document.getElementById('hero').style.backgroundImage = `url('${item.backdrop}')`;
+      const hero = document.getElementById('hero');
+      hero.style.backgroundImage = `url('${item.backdrop}')`;
       document.getElementById('heroTitle').innerText = item.title;
       document.getElementById('heroDesc').innerText = item.desc[currentLang] || item.desc.fr;
+      
+      const existingIframe = document.getElementById('heroTrailer');
+      if(existingIframe) existingIframe.remove();
+      clearTimeout(hero.trailerTimeout);
+
+      fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}/videos?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&language=fr-FR`)
+        .then(res => res.json())
+        .then(data => {
+            let trailer = data.results && data.results.find(v => v.site === "YouTube" && v.type === "Trailer");
+            if (!trailer && data.results) trailer = data.results.find(v => v.site === "YouTube"); 
+            
+            if (trailer) {
+                hero.trailerTimeout = setTimeout(() => {
+                     if (heroMovie.id === item.id) {
+                         const iframe = document.createElement('iframe');
+                         iframe.id = 'heroTrailer';
+                         iframe.style.position = 'absolute';
+                         iframe.style.inset = '-20%'; 
+                         iframe.style.width = '140%';
+                         iframe.style.height = '140%';
+                         iframe.style.border = 'none';
+                         iframe.style.zIndex = '1';
+                         iframe.style.opacity = '0';
+                         iframe.style.transition = 'opacity 1.5s ease';
+                         iframe.style.pointerEvents = 'none'; 
+                         iframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&loop=1&playlist=${trailer.key}`;
+                         
+                         iframe.onload = () => { iframe.style.opacity = '1'; };
+                         hero.appendChild(iframe);
+                     }
+                }, 800); 
+            }
+        }).catch(err => console.log("No trailer found", err));
     }
 
     function playHeroMovie() { openPlayerModal(heroMovie); }
@@ -974,6 +1013,23 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.onclick = () => openInfoModal(item);
+        
+        card.onmouseenter = () => {
+             clearTimeout(heroHoverTimeout);
+             heroHoverTimeout = setTimeout(() => {
+                 if(heroMovie.id !== item.id) {
+                     setHeroMovi(item);
+                     
+                     // Smooth scroll to top if hero is out of view
+                     if(window.scrollY > 300) {
+                         window.scrollTo({ top: 0, behavior: 'smooth' });
+                     }
+                 }
+             }, 350); 
+        };
+        card.onmouseleave = () => {
+             clearTimeout(heroHoverTimeout);
+        };
         
         let genreStr = item.genre.map(g => translations[currentLang][g] || g).join(' • ');
 
