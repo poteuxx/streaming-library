@@ -692,6 +692,7 @@
         Action: "Action",
         Adventure: "Aventure",
         Animation: "Animation",
+        Anime: "Animés",
         Comedy: "Comédie",
         Crime: "Crime",
         Documentary: "Documentaire",
@@ -728,6 +729,7 @@
         Action: "Action",
         Adventure: "Adventure",
         Animation: "Animation",
+        Anime: "Anime",
         Comedy: "Comedy",
         Crime: "Crime",
         Documentary: "Documentary",
@@ -826,6 +828,12 @@
                     seenIds.add(uniqueKey);
                     
                     let mappedGenres = item.genre_ids ? item.genre_ids.map(id => tmdbGenreMap[id]).filter(Boolean) : [];
+                    
+                    if (mappedGenres.includes("Animation") && item.original_language === "ja") {
+                         mappedGenres.push("Anime");
+                         mappedGenres = mappedGenres.filter(g => g !== "Animation");
+                    }
+                    
                     if (mappedGenres.length === 0) mappedGenres = ["Action"];
 
                     combined.push({
