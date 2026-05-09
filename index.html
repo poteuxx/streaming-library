@@ -95,6 +95,21 @@
     gap: 20px;
   }
 
+  /* CENTRAL BRAND LOGO */
+  .main-brand-logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) scaleY(1.15);
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    text-shadow: 0 0 10px rgba(229, 9, 20, 0.9), 0 0 20px rgba(229, 9, 20, 0.7), 0 0 5px #e50914;
+    pointer-events: none; /* Passes clicks through */
+    z-index: 10;
+  }
+
   /* SEARCH BARR */
   .search-container {
     position: relative;
@@ -520,6 +535,7 @@
     .search-input { width: 180px; }
     .hero-title { font-size: 32px; }
     .info-details { grid-template-columns: 1fr; }
+    .main-brand-logo { font-size: 16px; }
   }
 </style>
 </head>
@@ -535,6 +551,8 @@
         <a id="nav_movies" onclick="setTypeFilter('movie')" data-i18n="nav_movies">Films</a>
       </nav>
     </div>
+    
+    <div class="main-brand-logo">SolutionsTechnologie</div>
     
     <div class="nav-right">
       <div class="search-container">
