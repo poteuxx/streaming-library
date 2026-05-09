@@ -647,6 +647,7 @@
               <option value="autoembedto">Serveur 18 (AutoEmbed.to - Multi/FR)</option>
               <option value="vip">Serveur 19 (VidSrc.vip - EN)</option>
               <option value="nl">Serveur 20 (VidSrc.nl - EN)</option>
+              <option value="darki">Serveur 21 (French Exclusive / DarkiWorld)</option>
             </select>
           </div>
         </div>
@@ -1018,6 +1019,7 @@
                item.servers.autoembedto = `https://autoembed.to/tv/tmdb/${tmdbId}?lang=fr`;
                item.servers.vip = `https://vidsrc.vip/embed/tv/${tmdbId}`;
                item.servers.nl = `https://vidsrc.nl/embed/tv/${tmdbId}`;
+               item.servers.darki = `https://darkiworld.com/embed/tv/${tmdbId}/1/1`;
             } else {
                item.servers.vl = `https://frembed.pro/api/film.php?id=${tmdbId}`;
                item.servers.vl2 = `https://autoembed.co/movie/tmdb/${tmdbId}?lang=fr`;
@@ -1039,6 +1041,7 @@
                item.servers.autoembedto = `https://autoembed.to/movie/tmdb/${tmdbId}?lang=fr`;
                item.servers.vip = `https://vidsrc.vip/embed/movie/${tmdbId}`;
                item.servers.nl = `https://vidsrc.nl/embed/movie/${tmdbId}`;
+               item.servers.darki = `https://darkiworld.com/embed/movie/${tmdbId}`;
             }
             
             // Set default server
