@@ -64,11 +64,17 @@
   .logo {
     font-size: 26px;
     font-weight: 900;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    letter-spacing: -1px;
+    background: linear-gradient(to bottom, #e50914, #b20710);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .logo:hover {
+    filter: brightness(1.2) drop-shadow(0 0 5px rgba(229, 9, 20, 0.4));
   }
 
   .nav-links {
@@ -111,17 +117,34 @@
     /* Netflix Multiple Red Colors */
     background: linear-gradient(to bottom, #ff1e27 0%, #e50914 45%, #83040a 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     color: #e50914; 
     
     /* Drop shadow instead of text-shadow so it works with gradient text */
-    filter: drop-shadow(0px 3px 4px rgba(0, 0, 0, 0.9));
+    filter: drop-shadow(0px 3px 4px rgba(0, 0, 0, 0.9)) drop-shadow(0px 0px 1px rgba(229, 9, 20, 0.2));
     pointer-events: none;
     z-index: 10;
   }
   .main-brand-logo span {
     font-size: 11px;
     letter-spacing: 1.5px;
+  }
+
+  /* CUSTOM SCROLLBAR */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-main);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
   }
 
   /* SEARCH BARR */
@@ -141,6 +164,11 @@
     width: 250px;
     outline: none;
     transition: var(--transition);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    overflow: hidden;
   }
 
   .search-input:focus {
@@ -185,7 +213,7 @@
     display: flex;
     align-items: flex-end;
     padding: 80px 40px;
-    transition: background-image 0.5s ease;
+    transition: background-image 1s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
   }
 
@@ -254,18 +282,51 @@
 
   /* MAIN CONTAINER */
   .container {
-    padding: 20px 40px 60px;
+    padding: 0 40px 40px;
     position: relative;
     z-index: 5;
-    margin-top: -80px;
+    margin-top: -100px;
+  }
+
+  /* ROWS & CAROUSELS */
+  .content-row {
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .row-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--text-main);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  .row-inner {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 15px 4px;
+    scroll-behavior: smooth;
+    scrollbar-width: none; 
+  }
+
+  .row-inner::-webkit-scrollbar {
+    display: none;
   }
 
   /* GENRE FILTERS */
   .genres {
     display: flex;
     gap: 12px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 10;
   }
 
   .genre-btn {
@@ -286,58 +347,72 @@
     border-color: var(--text-main);
   }
 
-  /* SECTION TITLE */
-  .section-title {
+  /* ROWS & CAROUSELS */
+  .content-row {
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .row-title {
     font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--text-main);
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    padding: 0 4px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
 
-  /* GRID */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
+  .row-inner {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 15px 4px;
+    scroll-behavior: smooth;
+    scrollbar-width: none; 
   }
 
-  /* MOVIE CARD */
+  .row-inner::-webkit-scrollbar {
+    display: none;
+  }
+
   .card {
-    background: var(--bg-card);
-    border-radius: var(--card-radius);
+    flex: 0 0 280px; 
+    height: 158px;
+    background: #1a1c20;
+    border-radius: 6px;
     overflow: hidden;
     position: relative;
     cursor: pointer;
-    transition: var(--transition);
-    aspect-ratio: 16 / 9;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+    border: 1px solid rgba(255,255,255,0.05);
   }
 
   .card:hover {
-    transform: scale(1.05) translateY(-5px);
-    z-index: 10;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transform: scale(1.1);
+    z-index: 100;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+    border-color: rgba(255,255,255,0.3);
   }
 
   .card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s ease;
   }
 
-  .card .card-overlay {
+  .card-overlay {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 60%);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 30px 15px 15px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, transparent 100%);
     opacity: 0;
-    transition: opacity 0.3s;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 15px;
+    transition: opacity 0.3s ease;
   }
 
   .card:hover .card-overlay {
@@ -346,23 +421,29 @@
 
   .card-title {
     font-size: 14px;
-    font-weight: 800;
-    margin-bottom: 4px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 11px;
     color: var(--text-muted);
-    display: flex;
-    gap: 8px;
-    align-items: center;
   }
 
-  .quality-badge {
-    border: 1px solid rgba(255,255,255,0.5);
-    padding: 1px 4px;
-    border-radius: 3px;
-    font-size: 9px;
+  .badge-original {
+    background: #e50914;
+    color: white;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-weight: 900;
+    font-size: 10px;
+    text-transform: uppercase;
   }
 
   /* COMMON MODAL OVERLAY STYLES */
@@ -603,16 +684,17 @@
 
   <!-- MAIN CONTENT -->
   <div class="container">
-    
     <div class="genres" id="genreContainer">
-      <button class="genre-btn active" data-genre="all" data-i18n="genre_all">Tous</button>
       <!-- Genre buttons injected dynamically here -->
     </div>
 
-    <h2 class="section-title" id="sectionTitle" data-i18n="section_trending">Tendances Actuelles</h2>
+    <div id="rowsContainer">
+       <!-- Rows will be injected here -->
+    </div>
     
-    <div class="grid" id="grid">
-      <!-- Movie cards injected dynamically here -->
+    <div id="searchGrid" class="content-row" style="display:none; margin-top: 100px;">
+        <h2 class="row-title">Résultats</h2>
+        <div class="row-inner" id="searchInner" style="flex-wrap: wrap; overflow-x: visible;"></div>
     </div>
   </div>
 
@@ -1037,27 +1119,83 @@
     // Search
     document.getElementById('searchInput').addEventListener('input', (e) => {
       searchQuery = e.target.value.toLowerCase();
-      renderGrid();
+      const rows = document.getElementById('rowsContainer');
+      const sGrid = document.getElementById('searchGrid');
+      
+      if(searchQuery.length > 0) {
+          rows.style.display = 'none';
+          document.getElementById('genreContainer').style.display = 'none';
+          sGrid.style.display = 'block';
+          renderSearchGrid();
+      } else {
+          rows.style.display = 'block';
+          document.getElementById('genreContainer').style.display = 'flex';
+          sGrid.style.display = 'none';
+          renderRows();
+      }
     });
 
-    // Grid Rendering
-    function renderGrid() {
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
+    function renderSearchGrid() {
+        const inner = document.getElementById('searchInner');
+        inner.innerHTML = '';
+        const filtered = contentDB.filter(item => item.title.toLowerCase().includes(searchQuery));
+        if(filtered.length === 0) {
+            inner.innerHTML = `<div class="no-results" style="width: 100%; text-align: center; padding: 40px;">${translations[currentLang].no_results}</div>`;
+            return;
+        }
+        filtered.forEach(item => inner.appendChild(createCard(item)));
+    }
 
-      const filtered = contentDB.filter(item => {
-        const matchesType = currentTypeFilter === 'all' || item.type === currentTypeFilter;
-        const matchesGenre = currentFilter === 'all' || item.genre.includes(currentFilter);
-        const matchesSearch = item.title.toLowerCase().includes(searchQuery);
-        return matchesType && matchesGenre && matchesSearch;
-      });
+    // Grid -> Rows Rendering
+    function renderRows() {
+      const container = document.getElementById('rowsContainer');
+      container.innerHTML = '';
 
-      if(filtered.length === 0) {
-        grid.innerHTML = `<div class="no-results">${translations[currentLang].no_results}</div>`;
-        return;
+      if (currentFilter !== 'all') {
+         // If a genre is selected, just show one row for that genre
+         const filtered = contentDB.filter(item => item.genre.includes(currentFilter));
+         container.appendChild(createRow(translations[currentLang][currentFilter] || currentFilter, filtered));
+         return;
       }
 
-      filtered.forEach(item => {
+      // Define standard rows
+      const sections = [
+          { title: translations[currentLang].section_trending, items: contentDB.slice(0, 20) },
+          { title: translations[currentLang].nav_series, items: contentDB.filter(i => i.type === 'series').slice(0, 20) },
+          { title: translations[currentLang].nav_movies, items: contentDB.filter(i => i.type === 'movie').slice(0, 20) },
+          { title: translations[currentLang].Anime, items: contentDB.filter(i => i.genre.includes('Anime')).slice(0, 20) },
+          { title: translations[currentLang].Documentary, items: contentDB.filter(i => i.genre.includes('Documentary')).slice(0, 20) },
+          { title: translations[currentLang].Action, items: contentDB.filter(i => i.genre.includes('Action')).slice(0, 20) }
+      ];
+
+      sections.forEach(sec => {
+          if(sec.items.length > 0) {
+              container.appendChild(createRow(sec.title, sec.items));
+          }
+      });
+    }
+
+    function createRow(title, items) {
+        const row = document.createElement('div');
+        row.className = 'content-row';
+        
+        const titleEl = document.createElement('h2');
+        titleEl.className = 'row-title';
+        titleEl.innerText = title;
+        
+        const inner = document.createElement('div');
+        inner.className = 'row-inner';
+        
+        items.forEach(item => {
+            inner.appendChild(createCard(item));
+        });
+        
+        row.appendChild(titleEl);
+        row.appendChild(inner);
+        return row;
+    }
+
+    function createCard(item) {
         const card = document.createElement('div');
         card.className = 'card';
         card.onclick = () => openInfoModal(item);
@@ -1073,23 +1211,23 @@
         card.onmouseleave = () => {
              clearTimeout(heroHoverTimeout);
         };
-        
-        let genreStr = item.genre.map(g => translations[currentLang][g] || g).join(' • ');
 
         card.innerHTML = `
-          <img src="${item.thumb}" alt="${item.title}" loading="lazy">
+          <img src="${item.backdrop || item.thumb}" alt="${item.title}" loading="lazy">
           <div class="card-overlay">
             <h3 class="card-title">${item.title}</h3>
             <div class="card-meta">
-              <span class="quality-badge">HDSS</span>
+              <span class="badge-original">Studio</span>
               <span>${item.year}</span>
-              <span>${genreStr}</span>
+              <span>HD</span>
             </div>
           </div>
         `;
-        grid.appendChild(card);
-      });
+        return card;
     }
+
+    // Replace the old renderGrid function
+    function renderGrid() { renderRows(); }
 
     /* =========================================
        MORE INFO MODAL (Synopsis, Cast, Play)
