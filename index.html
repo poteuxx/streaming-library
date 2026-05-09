@@ -82,6 +82,7 @@
     font-weight: 600;
     font-size: 14px;
     transition: var(--transition);
+    cursor: pointer;
   }
 
   .nav-links a:hover, .nav-links a.active {
@@ -332,7 +333,7 @@
     font-size: 9px;
   }
 
-  /* MODAL PLAYER */
+  /* COMMON MODAL OVERLAY STYLES */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -364,13 +365,93 @@
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
     flex-direction: column;
+    max-height: 90vh; /* ensure it fits on screen */
   }
 
   .modal-overlay.active .modal-content {
     transform: scale(1);
   }
 
-  .modal-header {
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #181818;
+    border: 2px solid rgba(255,255,255,0.1);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    z-index: 100;
+  }
+
+  .modal-close:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: white;
+  }
+
+  /* INFO MODAL SPECIFIC (Senior Dev Setup) */
+  .info-hero {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .info-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, var(--bg-card) 0%, transparent 60%);
+  }
+
+  .info-details {
+    padding: 30px 40px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    overflow-y: auto;
+  }
+
+  .info-meta {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .match-score {
+    color: #46d369;
+    font-weight: 800;
+  }
+
+  .info-desc {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #e5e5e5;
+  }
+
+  .info-sidebar p {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 12px;
+  }
+  
+  .info-sidebar span.highlight {
+    color: #d2d2d2;
+  }
+
+  /* VIDEO PLAYER MODAL SPECIFIC */
+  .player-header {
     padding: 20px;
     display: flex;
     justify-content: space-between;
@@ -378,7 +459,7 @@
     border-bottom: 1px solid rgba(255,255,255,0.05);
   }
 
-  .modal-title-area h2 {
+  .player-title-area h2 {
     font-size: 22px;
     margin-bottom: 4px;
   }
@@ -402,25 +483,6 @@
     border-radius: 6px;
     outline: none;
     cursor: pointer;
-  }
-
-  .modal-close {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-  }
-
-  .modal-close:hover {
-    background: rgba(255,255,255,0.2);
   }
 
   .iframe-container {
@@ -454,6 +516,7 @@
     .container { padding: 20px; }
     .search-input { width: 180px; }
     .hero-title { font-size: 32px; }
+    .info-details { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -464,9 +527,9 @@
     <div class="nav-left">
       <div class="logo">Poteuxx</div>
       <nav class="nav-links">
-        <a href="#" class="active" data-i18n="nav_home">Accueil</a>
-        <a href="#" data-i18n="nav_series">Séries</a>
-        <a href="#" data-i18n="nav_movies">Films</a>
+        <a id="nav_home" class="active" onclick="setTypeFilter('all')" data-i18n="nav_home">Accueil</a>
+        <a id="nav_series" onclick="setTypeFilter('series')" data-i18n="nav_series">Séries</a>
+        <a id="nav_movies" onclick="setTypeFilter('movie')" data-i18n="nav_movies">Films</a>
       </nav>
     </div>
     
@@ -493,7 +556,7 @@
           </svg>
           <span data-i18n="btn_play">Lecture</span>
         </button>
-        <button class="hero-btn hero-btn-secondary">
+        <button class="hero-btn hero-btn-secondary" onclick="infoHeroMovie()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
           </svg>
@@ -508,33 +571,69 @@
     
     <div class="genres" id="genreContainer">
       <button class="genre-btn active" data-genre="all" data-i18n="genre_all">Tous</button>
-      <!-- Genre buttons will be injected here -->
+      <!-- Genre buttons injected dynamically here -->
     </div>
 
-    <h2 class="section-title" data-i18n="section_trending">Tendances Actuelles</h2>
+    <h2 class="section-title" id="sectionTitle" data-i18n="section_trending">Tendances Actuelles</h2>
     
     <div class="grid" id="grid">
-      <!-- Movie cards will be injected here -->
+      <!-- Movie cards injected dynamically here -->
     </div>
   </div>
 
-  <!-- SECURE MODAL PLAYER -->
+  <!-- MORE INFO MODAL (Professional Overview) -->
+  <div class="modal-overlay" id="infoModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeInfoModal()">×</button>
+      
+      <div class="info-hero" id="infoHeroBg" style="background-image: url('');">
+        <!-- Overlay text could go here, but doing it below matches Netflix -->
+      </div>
+      
+      <div class="info-details">
+        <div>
+          <h2 id="infoTitle" style="font-size: 32px; font-weight: 800; margin-bottom: 10px;">Movie Title</h2>
+          <div class="info-meta">
+            <span class="match-score">Recommandé à 98%</span>
+            <span id="infoYear">2024</span>
+            <span class="quality-badge" id="infoType">HD</span>
+            <span class="quality-badge" style="border-color: #777;">5.1</span>
+          </div>
+          
+          <button class="hero-btn" id="infoPlayBtn" style="margin-bottom: 25px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <span data-i18n="btn_play">Lecture</span>
+          </button>
+          
+          <p class="info-desc" id="infoDesc">Description du film ici.</p>
+        </div>
+        
+        <div class="info-sidebar">
+           <p>Genre: <span class="highlight" id="infoGenres">Action, Sci-Fi</span></p>
+           <p>Source HDSS: <span class="highlight">Vérifiée</span></p>
+           <p>Catégorie: <span class="highlight" id="infoCategory">Film</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURE VIDEO MODAL -->
   <div class="modal-overlay" id="playerModal">
     <div class="modal-content">
       
-      <div class="modal-header">
-        <div class="modal-title-area">
-          <h2 id="modalTitle">Film Title</h2>
+      <div class="player-header">
+        <div class="player-title-area">
+          <h2 id="playerTitle">Film Title</h2>
           <div class="server-selector">
             <label for="serverSelect" data-i18n="label_server">Serveur:</label>
             <select id="serverSelect" class="server-select" onchange="changeServer()">
-              <option value="auto" data-i18n="server_auto">Automatique</option>
-              <option value="fr">FR Vidéo</option>
-              <option value="en">EN Video</option>
+              <option value="auto" data-i18n="server_auto">Automatique (HDSS)</option>
+              <option value="fr">HDSS FR Vidéo</option>
+              <option value="en">HDSS EN Video</option>
             </select>
           </div>
         </div>
-        <button class="modal-close" onclick="closePlayer()">×</button>
+        <button class="modal-close" style="position: static;" onclick="closePlayerModal()">×</button>
       </div>
 
       <div class="iframe-container">
@@ -563,9 +662,13 @@
         btn_info: "Plus d'infos",
         genre_all: "Tous",
         section_trending: "Tendances Actuelles",
+        section_movies: "Films D'Action & Récents",
+        section_series: "Top Séries",
         label_server: "Serveur:",
-        server_auto: "Automatique",
+        server_auto: "Automatique (HDSS)",
         no_results: "Aucun résultat trouvé pour votre recherche.",
+        type_movie: "Film",
+        type_series: "Série",
         // Genres
         Action: "Action",
         Comedy: "Comédie",
@@ -583,9 +686,13 @@
         btn_info: "More Info",
         genre_all: "All",
         section_trending: "Trending Now",
+        section_movies: "Action & New Movies",
+        section_series: "Top Series",
         label_server: "Server:",
-        server_auto: "Auto",
+        server_auto: "Auto (HDSS)",
         no_results: "No results found for your search.",
+        type_movie: "Movie",
+        type_series: "Series",
         // Genres
         Action: "Action",
         Comedy: "Comedy",
@@ -601,10 +708,8 @@
     function setLanguage(lang) {
       currentLang = lang;
       
-      // Update toggle button text
       document.getElementById('langToggle').innerText = lang === 'fr' ? 'EN' : 'FR';
       
-      // Update text nodes
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (translations[lang][key]) {
@@ -612,7 +717,6 @@
         }
       });
 
-      // Update placeholders
       document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
         if (translations[lang][key]) {
@@ -620,12 +724,11 @@
         }
       });
 
-      // Re-render genre buttons
+      updateSectionTitle();
       renderGenres();
-      
-      // Re-render hero and grid (in case data needs lang change, though mock uses fr/en properties if needed)
-      // Actually we just need to ensure the genre tags inside titles/meta update if we had localized data.
       renderGrid();
+      
+      if(heroMovie) setHeroMovi(heroMovie); // Refresh hero text
     }
 
     function toggleLang() {
@@ -633,13 +736,12 @@
     }
 
     /* =========================================
-       MOCK DATABASE (GitHub Pages Compatible)
+       MOCK DATABASE (Mimicking HDSS Architecture)
        ========================================= */
-    // Since we can't host a true backend easily on GH pages without an external API, 
-    // we use a structured JS object to hold data.
-    const movies = [
+    const contentDB = [
       {
         id: 1,
+        type: "series",
         title: "Cyberpunk: Edgerunners",
         desc: {
           fr: "Dans une dystopie corrompue par la cybernétique, un jeune de la rue talentueux et impulsif s'efforce de devenir mercenaire.",
@@ -649,7 +751,7 @@
         thumb: "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?w=600&q=80",
         backdrop: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1600&q=80",
         servers: {
-          auto: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Replace with real iframe sources
+          auto: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Ex: Your HDSS iframe URL goes here
           fr: "https://www.youtube.com/embed/dQw4w9WgXcQ?hl=fr",
           en: "https://www.youtube.com/embed/dQw4w9WgXcQ?hl=en"
         },
@@ -657,6 +759,7 @@
       },
       {
         id: 2,
+        type: "movie",
         title: "Neon Nights",
         desc: {
           fr: "Un détective enquête sur une série de crimes mystérieux dans les néons de Tokyo.",
@@ -674,6 +777,7 @@
       },
       {
         id: 3,
+        type: "movie",
         title: "Laugh Riot",
         desc: {
           fr: "La comédie de l'année. Un groupe d'amis part en voyage.",
@@ -691,6 +795,7 @@
       },
        {
         id: 4,
+        type: "movie",
         title: "Deep Space",
         desc: {
           fr: "Au delà des étoiles, l'inconnu terrifiant.",
@@ -708,6 +813,7 @@
       },
       {
         id: 5,
+        type: "series",
         title: "Urban Samurai",
         desc: {
           fr: "Une vengeance au coeur de la ville.",
@@ -728,73 +834,94 @@
     /* =========================================
        STATE & RENDER LOGIC
        ========================================= */
-    let currentFilter = 'all';
+    let currentFilter = 'all'; // genre filter
+    let currentTypeFilter = 'all'; // "all", "movie", "series"
     let searchQuery = '';
-    let heroMovie = movies[0]; // Featured movie
-    let activeMovie = null; // Movie currently in modal
+    let heroMovie = contentDB[0]; 
+    let activeMovie = null; // Used for Video Player
 
-    // Init App
     function init() {
       setLanguage('fr');
-      setHeroMovi(movies[0]);
+      setHeroMovi(contentDB[0]);
       renderGenres();
       renderGrid();
     }
 
-    // Set Hero
-    function setHeroMovi(movie) {
-      if(!movie) return;
-      heroMovie = movie;
-      document.getElementById('hero').style.backgroundImage = `url('${movie.backdrop}')`;
-      document.getElementById('heroTitle').innerText = movie.title;
-      document.getElementById('heroDesc').innerText = movie.desc[currentLang] || movie.desc.fr;
+    function setHeroMovi(item) {
+      if(!item) return;
+      heroMovie = item;
+      document.getElementById('hero').style.backgroundImage = `url('${item.backdrop}')`;
+      document.getElementById('heroTitle').innerText = item.title;
+      document.getElementById('heroDesc').innerText = item.desc[currentLang] || item.desc.fr;
     }
 
-    function playHeroMovie() {
-      openPlayer(heroMovie);
+    function playHeroMovie() { openPlayerModal(heroMovie); }
+    function infoHeroMovie() { openInfoModal(heroMovie); }
+
+    // Navigation Tabs
+    function setTypeFilter(type) {
+      currentTypeFilter = type;
+      
+      // Update Navigation styling
+      document.getElementById('nav_home').classList.remove('active');
+      document.getElementById('nav_series').classList.remove('active');
+      document.getElementById('nav_movies').classList.remove('active');
+      
+      if(type === 'all') document.getElementById('nav_home').classList.add('active');
+      if(type === 'series') document.getElementById('nav_series').classList.add('active');
+      if(type === 'movie') document.getElementById('nav_movies').classList.add('active');
+
+      updateSectionTitle();
+      renderGrid();
     }
 
-    // Render Genres
+    function updateSectionTitle() {
+      const titleEl = document.getElementById('sectionTitle');
+      if(currentTypeFilter === 'all') titleEl.innerText = translations[currentLang].section_trending;
+      if(currentTypeFilter === 'movie') titleEl.innerText = translations[currentLang].section_movies;
+      if(currentTypeFilter === 'series') titleEl.innerText = translations[currentLang].section_series;
+    }
+
+    // Genre Rendering
     function renderGenres() {
       const container = document.getElementById('genreContainer');
-      // Keep "All" button
-      const allBtnHTML = `<button class="genre-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">${translations[currentLang].genre_all}</button>`;
+      const allBtnHTML = `<button class="genre-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="setGenreFilter('all')">${translations[currentLang].genre_all}</button>`;
       
-      // Extract unique genres
       const allGenres = new Set();
-      movies.forEach(m => m.genre.forEach(g => allGenres.add(g)));
+      contentDB.forEach(m => m.genre.forEach(g => allGenres.add(g)));
       
       let genresHTML = '';
       Array.from(allGenres).forEach(g => {
         const localizedName = translations[currentLang][g] || g;
         const isActive = currentFilter === g ? 'active' : '';
-        genresHTML += `<button class="genre-btn ${isActive}" onclick="setFilter('${g}')">${localizedName}</button>`;
+        genresHTML += `<button class="genre-btn ${isActive}" onclick="setGenreFilter('${g}')">${localizedName}</button>`;
       });
 
       container.innerHTML = allBtnHTML + genresHTML;
     }
 
-    function setFilter(genre) {
+    function setGenreFilter(genre) {
       currentFilter = genre;
-      renderGenres(); // update active class
+      renderGenres(); 
       renderGrid();
     }
 
-    // Live Search
+    // Search
     document.getElementById('searchInput').addEventListener('input', (e) => {
       searchQuery = e.target.value.toLowerCase();
       renderGrid();
     });
 
-    // Render Grid
+    // Grid Rendering
     function renderGrid() {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
 
-      const filtered = movies.filter(movie => {
-        const matchesGenre = currentFilter === 'all' || movie.genre.includes(currentFilter);
-        const matchesSearch = movie.title.toLowerCase().includes(searchQuery);
-        return matchesGenre && matchesSearch;
+      const filtered = contentDB.filter(item => {
+        const matchesType = currentTypeFilter === 'all' || item.type === currentTypeFilter;
+        const matchesGenre = currentFilter === 'all' || item.genre.includes(currentFilter);
+        const matchesSearch = item.title.toLowerCase().includes(searchQuery);
+        return matchesType && matchesGenre && matchesSearch;
       });
 
       if(filtered.length === 0) {
@@ -802,20 +929,20 @@
         return;
       }
 
-      filtered.forEach(movie => {
+      filtered.forEach(item => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.onclick = () => openPlayer(movie);
+        card.onclick = () => openInfoModal(item);
         
-        let genreStr = movie.genre.map(g => translations[currentLang][g] || g).join(' • ');
+        let genreStr = item.genre.map(g => translations[currentLang][g] || g).join(' • ');
 
         card.innerHTML = `
-          <img src="${movie.thumb}" alt="${movie.title}" loading="lazy">
+          <img src="${item.thumb}" alt="${item.title}" loading="lazy">
           <div class="card-overlay">
-            <h3 class="card-title">${movie.title}</h3>
+            <h3 class="card-title">${item.title}</h3>
             <div class="card-meta">
-              <span class="quality-badge">HD</span>
-              <span>${movie.year}</span>
+              <span class="quality-badge">HDSS</span>
+              <span>${item.year}</span>
               <span>${genreStr}</span>
             </div>
           </div>
@@ -825,46 +952,73 @@
     }
 
     /* =========================================
-       MODAL PLAYER & SECURITY
+       MORE INFO MODAL (Synopsis, Cast, Play)
        ========================================= */
-    const modal = document.getElementById('playerModal');
+    const infoModal = document.getElementById('infoModal');
+
+    function openInfoModal(item) {
+      document.getElementById('infoHeroBg').style.backgroundImage = `url('${item.backdrop}')`;
+      document.getElementById('infoTitle').innerText = item.title;
+      document.getElementById('infoYear').innerText = item.year;
+      document.getElementById('infoDesc').innerText = item.desc[currentLang] || item.desc.fr;
+      
+      const typeKey = item.type === 'movie' ? 'type_movie' : 'type_series';
+      document.getElementById('infoType').innerText = translations[currentLang][typeKey];
+      document.getElementById('infoCategory').innerText = translations[currentLang][typeKey];
+
+      const genreStr = item.genre.map(g => translations[currentLang][g] || g).join(', ');
+      document.getElementById('infoGenres').innerText = genreStr;
+
+      document.getElementById('infoPlayBtn').onclick = () => {
+        closeInfoModal();
+        setTimeout(() => openPlayerModal(item), 100);
+      };
+
+      infoModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeInfoModal() {
+      infoModal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    /* =========================================
+       VIDEO PLAYER MODAL (Embed logic)
+       ========================================= */
+    const playerModal = document.getElementById('playerModal');
     const iframe = document.getElementById('playerIframe');
     const serverSelect = document.getElementById('serverSelect');
 
-    function openPlayer(movie) {
-      activeMovie = movie;
-      document.getElementById('modalTitle').innerText = movie.title;
+    function openPlayerModal(item) {
+      activeMovie = item;
+      document.getElementById('playerTitle').innerText = item.title;
       
-      // Reset to auto server
       serverSelect.value = 'auto';
       updatePlayerSource();
       
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden'; // prevent background scroll
+      playerModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
-    function closePlayer() {
-      modal.classList.remove('active');
+    function closePlayerModal() {
+      playerModal.classList.remove('active');
       document.body.style.overflow = '';
       
-      // Wait for transition before removing src to avoid flicker, but stop audio immediately
+      // Stop media from playing in background
       setTimeout(() => {
         iframe.src = '';
         activeMovie = null;
       }, 300);
     }
 
-    function changeServer() {
-      updatePlayerSource();
-    }
+    function changeServer() { updatePlayerSource(); }
 
     function updatePlayerSource() {
       if(!activeMovie) return;
       const sv = serverSelect.value;
-      const url = activeMovie.servers[sv] || activeMovie.servers.auto; // fallback
+      const url = activeMovie.servers[sv] || activeMovie.servers.auto; 
       
-      // Securing via sandbox iframe attributes already defined in HTML.
-      // Additionally, verify URL starts with http/https to prevent js execution
       if(url.startsWith('http://') || url.startsWith('https://')) {
          iframe.src = url;
       } else {
@@ -873,14 +1027,16 @@
       }
     }
 
-    // Close on click outside
-    modal.addEventListener('click', (e) => {
-      if(e.target === modal) {
-        closePlayer();
-      }
+    // Close Modals on click outside
+    infoModal.addEventListener('click', (e) => {
+      if(e.target === infoModal) closeInfoModal();
+    });
+    
+    playerModal.addEventListener('click', (e) => {
+      if(e.target === playerModal) closePlayerModal();
     });
 
-    // Start
+    // Start App
     init();
 
   </script>
