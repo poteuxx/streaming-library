@@ -690,11 +690,23 @@
         type_series: "Série",
         // Genres
         Action: "Action",
+        Adventure: "Aventure",
+        Animation: "Animation",
         Comedy: "Comédie",
+        Crime: "Crime",
+        Documentary: "Documentaire",
         Drama: "Drame",
-        SciFi: "Sci-Fi",
+        Family: "Famille",
+        Fantasy: "Fantastique",
+        History: "Histoire",
         Horror: "Horreur",
-        Animation: "Animation"
+        Music: "Musique",
+        Mystery: "Mystère",
+        Romance: "Romance",
+        SciFi: "Sci-Fi",
+        Thriller: "Thriller",
+        War: "Guerre",
+        Western: "Western"
       },
       en: {
         nav_home: "Home",
@@ -714,11 +726,23 @@
         type_series: "Series",
         // Genres
         Action: "Action",
+        Adventure: "Adventure",
+        Animation: "Animation",
         Comedy: "Comedy",
+        Crime: "Crime",
+        Documentary: "Documentary",
         Drama: "Drama",
-        SciFi: "Sci-Fi",
+        Family: "Family",
+        Fantasy: "Fantasy",
+        History: "History",
         Horror: "Horror",
-        Animation: "Animation"
+        Music: "Music",
+        Mystery: "Mystery",
+        Romance: "Romance",
+        SciFi: "Sci-Fi",
+        Thriller: "Thriller",
+        War: "War",
+        Western: "Western"
       }
     };
 
@@ -790,15 +814,27 @@
                  const type = isMovie ? "movie" : "series";
                  const uniqueKey = `${type}_${item.id}`;
                  
+                 const tmdbGenreMap = {
+                    28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
+                    99: "Documentary", 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History",
+                    27: "Horror", 10402: "Music", 9648: "Mystery", 10749: "Romance", 878: "SciFi",
+                    53: "Thriller", 10752: "War", 37: "Western", 10759: "Action", 10762: "Family", 
+                    10765: "SciFi", 10768: "War"
+                 };
+                 
                  if (!seenIds.has(uniqueKey) && item.poster_path && item.backdrop_path) {
                     seenIds.add(uniqueKey);
+                    
+                    let mappedGenres = item.genre_ids ? item.genre_ids.map(id => tmdbGenreMap[id]).filter(Boolean) : [];
+                    if (mappedGenres.length === 0) mappedGenres = ["Action"];
+
                     combined.push({
                        id: contentDB.length + combined.length,
                        tmdbId: item.id,
                        type: type,
                        title: isMovie ? (item.title || item.original_title) : (item.name || item.original_name),
                        desc: { fr: item.overview || "Aucune description.", en: item.overview || "No description." },
-                       genre: ["Action"], // can map real genres later
+                       genre: mappedGenres,
                        thumb: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
                        backdrop: `https://image.tmdb.org/t/p/original${item.backdrop_path}`,
                        year: isMovie 
