@@ -627,9 +627,9 @@
           <div class="server-selector">
             <label for="serverSelect" data-i18n="label_server">Serveur:</label>
             <select id="serverSelect" class="server-select" onchange="changeServer()">
-              <option value="auto" data-i18n="server_auto">Automatique (HDSS)</option>
-              <option value="fr">HDSS FR Vidéo</option>
-              <option value="en">HDSS EN Video</option>
+              <option value="su" data-i18n="server_auto">Serveur 1 (Stable)</option>
+              <option value="xyz">Serveur 2 (Backup)</option>
+              <option value="cc">Serveur 3 (Alt)</option>
             </select>
           </div>
         </div>
@@ -637,9 +637,9 @@
       </div>
 
       <div class="iframe-container">
-        <!-- Using sandbox attribute for security -->
+        <!-- Using sandbox attribute with essential permissions for modern players -->
         <iframe id="playerIframe" 
-                sandbox="allow-scripts allow-same-origin allow-presentation" 
+                sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-forms" 
                 allowfullscreen 
                 src="">
         </iframe>
@@ -984,15 +984,19 @@
             const match = tmdbData.results[0]; // first best match
             const tmdbId = match.id;
             
-            // Construct a robust, universally working player
-            let embedUrl;
+            // Construct robust, universally working players across multiple hosts
             if (item.type === "series" || match.media_type === "tv") {
-               embedUrl = `https://vidsrc.in/embed/tv?tmdb=${tmdbId}&season=1&episode=1`; // Starts s1e1
+               item.servers.su = `https://embed.su/embed/tv/${tmdbId}/1/1`;
+               item.servers.xyz = `https://vidsrc.xyz/embed/tv?tmdb=${tmdbId}&season=1&episode=1`;
+               item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}/1/1`;
             } else {
-               embedUrl = `https://vidsrc.in/embed/movie?tmdb=${tmdbId}`;
+               item.servers.su = `https://embed.su/embed/movie/${tmdbId}`;
+               item.servers.xyz = `https://vidsrc.xyz/embed/movie?tmdb=${tmdbId}`;
+               item.servers.cc = `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
             }
             
-            item.servers.auto = embedUrl;
+            // Set default server
+            item.servers.auto = item.servers.su;
           } else {
              item.servers.auto = "error";
           }
@@ -1002,7 +1006,7 @@
       }
 
       document.getElementById('playerTitle').innerText = item.title;
-      serverSelect.value = 'auto';
+      serverSelect.value = 'su';
       updatePlayerSource();
     }
 
@@ -1024,7 +1028,7 @@
       const sv = serverSelect.value;
       const url = activeMovie.servers[sv] || activeMovie.servers.auto; 
       
-      if(url.startsWith('http://') || url.startsWith('https://')) {
+      if(url && (url.startsWith('http://') || url.startsWith('https://'))) {
          iframe.src = url;
       } else {
          console.error("Invalid URL detected.");
