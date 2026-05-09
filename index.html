@@ -604,25 +604,41 @@
     margin-bottom: 4px;
   }
 
-  .server-selector {
+  .server-grid {
     display: flex;
-    align-items: center;
     gap: 10px;
+    overflow-x: auto;
+    padding: 15px 20px;
+    background: rgba(0,0,0,0.3);
+    scrollbar-width: thin;
+    scrollbar-color: #444 transparent;
   }
 
-  .server-selector label {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .server-select {
-    background: #1e293b;
-    color: white;
-    border: 1px solid #334155;
-    padding: 6px 12px;
-    border-radius: 6px;
-    outline: none;
+  .server-btn {
+    flex: 0 0 auto;
+    background: #242424;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #e5e5e5;
+    padding: 10px 18px;
+    border-radius: 4px;
     cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .server-btn:hover {
+    background: #333;
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .server-btn.active {
+    background: white;
+    color: black;
+    border-color: white;
   }
 
   .iframe-container {
@@ -1344,7 +1360,6 @@
        ========================================= */
     const playerModal = document.getElementById('playerModal');
     const iframe = document.getElementById('playerIframe');
-    const serverSelect = document.getElementById('serverSelect');
 
     async function openPlayerModal(item) {
       activeMovie = item;
@@ -1411,8 +1426,8 @@
       }
 
       document.getElementById('playerTitle').innerText = item.title;
-      serverSelect.value = 'vl';
-      updatePlayerSource();
+      renderServerGrid();
+      updatePlayerSource('vl');
     }
 
     function closePlayerModal() {
@@ -1426,19 +1441,63 @@
       }, 300);
     }
 
-    function changeServer() { updatePlayerSource(); }
+    function changeServer() { updatePlayerSource('vl'); }
 
-    function updatePlayerSource() {
+    function renderServerGrid() {
+        const grid = document.getElementById('serverGrid');
+        if(!grid) return;
+        grid.innerHTML = '';
+        
+        const svs = [
+            { id: 'vl', label: 'Serveur 1 (VF/VOSTFR)' },
+            { id: 'vl2', label: 'Serveur 2 (Auto Multi)' },
+            { id: 'darki', label: 'Serveur 3 (Exclu FR)' },
+            { id: 'autoembedto', label: 'Serveur 4 (Auto FR)' },
+            { id: 'xyz', label: 'Serveur 5 (VidSrc.xyz)' },
+            { id: 'icu', label: 'Serveur 6 (VidSrc.icu)' },
+            { id: 'su', label: 'Serveur 7 (VidSrc.su)' },
+            { id: 'me', label: 'Serveur 8 (VidSrc.me)' },
+            { id: 'to', label: 'Serveur 9 (VidSrc.to)' },
+            { id: 'link', label: 'Serveur 10 (VidSrc.link)' },
+            { id: 'top', label: 'Serveur 11 (VidSrc.top)' },
+            { id: 'super', label: 'Serveur 12 (SuperEmbed)' },
+            { id: 'multiembed', label: 'Serveur 13 (MultiEmbed)' },
+            { id: 'vidlink', label: 'Serveur 14 (VidLink.pro)' },
+            { id: 'embedsu', label: 'Serveur 15 (Embed.su)' },
+            { id: 'smashy', label: 'Serveur 16 (Smashy)' }
+        ];
+        
+        svs.forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = `server-btn ${currentServer === s.id ? 'active' : ''}`;
+            btn.innerText = s.label;
+            btn.onclick = () => {
+                updatePlayerSource(s.id);
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    let currentServer = 'vl';
+    
+    function updatePlayerSource(serverId) {
       if(!activeMovie) return;
-      const sv = serverSelect.value;
-      const url = activeMovie.servers[sv] || activeMovie.servers.auto; 
+      currentServer = serverId || currentServer;
       
+      const url = activeMovie.servers[currentServer] || activeMovie.servers.auto; 
+      
+      // Update UI active state
+      document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = Array.from(document.querySelectorAll('.server-btn')).find(b => b.onclick.toString().includes(currentServer));
+      if(activeBtn) activeBtn.classList.add('active');
+
       if(url && (url.startsWith('http://') || url.startsWith('https://'))) {
          iframe.src = url;
       } else {
          console.error("Invalid URL detected.");
          iframe.src = '';
       }
+      renderServerGrid(); // Re-render to update active state
     }
 
     // Close Modals on click outside
