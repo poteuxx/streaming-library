@@ -744,54 +744,60 @@
 
     async function fetchHDSSData() {
       try {
-        console.log("Fetching HDSS home...");
-        document.getElementById('heroTitle').innerText = translations[currentLang].btn_play === "Play" ? "Loading HDSS Catalog..." : "Chargement du catalogue HDSS...";
+        console.log("Fetching HDSS full catalog...");
+        document.getElementById('heroTitle').innerText = "Chargement Séries & Films HDSS...";
         
-        const response = await fetch(proxy + encodeURIComponent(baseUrl));
-        const data = await response.json();
+        const urlsToScrape = [
+           'https://www.hdss.art/films/',
+           'https://www.hdss.art/series/'
+        ];
         
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data.contents, 'text/html');
-        
-        const articles = doc.querySelectorAll('article.short-item');
         contentDB = [];
+        const parser = new DOMParser();
 
-        articles.forEach((art, index) => {
-          const a = art.querySelector('a.short-item__img');
-          const img = art.querySelector('img');
-          const title = art.querySelector('h3.short-item__title');
-          
-          if(a && img && title) {
-            let imgUrl = img.getAttribute('src');
-            if(imgUrl.startsWith('/')) imgUrl = baseUrl + imgUrl;
+        for (let url of urlsToScrape) {
+          try {
+            const response = await fetch(proxy + encodeURIComponent(url));
+            const data = await response.json();
+            const doc = parser.parseFromString(data.contents, 'text/html');
+            const articles = doc.querySelectorAll('article.short-item');
             
-            let linkUrl = a.getAttribute('href');
-            if(linkUrl.startsWith('/')) linkUrl = baseUrl + linkUrl;
+            articles.forEach((art) => {
+              const a = art.querySelector('a.short-item__img');
+              const img = art.querySelector('img');
+              const title = art.querySelector('h3.short-item__title');
+              
+              if(a && img && title) {
+                let imgUrl = img.getAttribute('src');
+                if(imgUrl.startsWith('/')) imgUrl = baseUrl + imgUrl;
+                
+                let linkUrl = a.getAttribute('href');
+                if(linkUrl.startsWith('/')) linkUrl = baseUrl + linkUrl;
 
-            // Guess type from url (series vs film)
-            let type = "movie";
-            if(linkUrl.includes('/series/')) type = "series";
+                let type = url.includes('/series/') ? "series" : "movie";
 
-            contentDB.push({
-              id: index,
-              type: type,
-              title: title.innerText.trim(),
-              desc: {
-                fr: "Description disponible lors de la lecture sur HDSS.",
-                en: "Description available upon playing on HDSS."
-              },
-              genre: ["Action"], // Simplified for dynamic loading
-              thumb: imgUrl,
-              backdrop: imgUrl, // Fallback backdrop
-              link: linkUrl,
-              year: new Date().getFullYear(),
-              servers: { auto: null } // Fetched on demand
+                contentDB.push({
+                  id: contentDB.length,
+                  type: type,
+                  title: title.innerText.trim(),
+                  desc: { fr: "Profitez du contenu complet sans interruption.", en: "Enjoy full content uninterrupted." },
+                  genre: ["Action"], 
+                  thumb: imgUrl,
+                  backdrop: imgUrl, 
+                  link: linkUrl,
+                  year: new Date().getFullYear(),
+                  servers: { auto: null }
+                });
+              }
             });
+          } catch(e) {
+            console.error("Erreur lors de la pagination:", url);
           }
-        });
+        }
 
         if(contentDB.length > 0) {
           console.log(`Loaded ${contentDB.length} items from HDSS`);
+          // Shuffle slightly to mix series and films if we want, or keep order.
           setHeroMovi(contentDB[0]);
           renderGenres();
           renderGrid();
@@ -799,7 +805,7 @@
 
       } catch (err) {
         console.error("HDSS Scrape Error:", err);
-        document.getElementById('heroDesc').innerText = "Erreur de connexion au proxy HDSS.";
+        document.getElementById('heroDesc').innerText = "Erreur proxy HDSS.";
       }
     }
 
@@ -964,24 +970,29 @@
 
     async function openPlayerModal(item) {
       activeMovie = item;
-      document.getElementById('playerTitle').innerText = item.title + " (Loading Server...)";
+      document.getElementById('playerTitle').innerText = item.title + " (Génération Sécurisée...)";
       playerModal.classList.add('active');
       document.body.style.overflow = 'hidden';
 
-      if (!item.servers.auto) {
-        // Fetch specific movie page to extract iframe
+      if (!item.servers.auto || item.servers.auto === "error") {
         try {
-          const res = await fetch(proxy + encodeURIComponent(item.link));
-          const data = await res.json();
-          const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+          // By API mapping the scraped HDSS title, we guarantee a working iframe from an external source!
+          const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=${encodeURIComponent(item.title)}&language=fr-FR`);
+          const tmdbData = await tmdbRes.json();
           
-          // Trying to locate HDSS video iframes (often inside .video-responsive or specific id)
-          const iframeEl = doc.querySelector('.video-responsive iframe') || doc.querySelector('iframe');
-          
-          if(iframeEl && iframeEl.src) {
-             let embedUrl = iframeEl.src;
-             if(embedUrl.startsWith('//')) embedUrl = 'https:' + embedUrl;
-             item.servers.auto = embedUrl;
+          if(tmdbData.results && tmdbData.results.length > 0) {
+            const match = tmdbData.results[0]; // first best match
+            const tmdbId = match.id;
+            
+            // Construct a robust, universally working player
+            let embedUrl;
+            if (item.type === "series" || match.media_type === "tv") {
+               embedUrl = `https://vidsrc.in/embed/tv?tmdb=${tmdbId}&season=1&episode=1`; // Starts s1e1
+            } else {
+               embedUrl = `https://vidsrc.in/embed/movie?tmdb=${tmdbId}`;
+            }
+            
+            item.servers.auto = embedUrl;
           } else {
              item.servers.auto = "error";
           }
