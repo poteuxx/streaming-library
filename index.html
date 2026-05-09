@@ -399,11 +399,48 @@
     padding: 15px 4px;
     scroll-behavior: smooth;
     scrollbar-width: none; 
+    -ms-overflow-style: none;
   }
 
   .row-inner::-webkit-scrollbar {
     display: none;
   }
+
+  .content-row {
+    position: relative;
+    margin-bottom: 30px;
+  }
+
+  .row-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 45px;
+    height: 100px;
+    background: rgba(0,0,0,0.4);
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+  }
+
+  .content-row:hover .row-nav-btn {
+    opacity: 1;
+  }
+
+  .row-nav-btn:hover {
+    background: rgba(0,0,0,0.8);
+    color: var(--netflix-red);
+  }
+
+  .row-nav-btn.prev { left: 0; border-radius: 0 4px 4px 0; }
+  .row-nav-btn.next { right: 0; border-radius: 4px 0 0 4px; }
 
   .card {
     flex: 0 0 280px; 
@@ -958,13 +995,20 @@
         
         const apiKey = "15d2ea6d0dc1d476efbca3eba2b9bbfb";
         
+        
         let fetchPromises = [];
-        for (let i = 1; i <= 3; i++) { // Fetch 3 pages of each category
+        for (let i = 1; i <= 6; i++) { // Fetch 6 pages of each category (~480 titles)
            fetchPromises.push(fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}&language=fr-FR&page=${i}`).then(r => r.json()));
            fetchPromises.push(fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${apiKey}&language=fr-FR&page=${i}`).then(r => r.json()));
            fetchPromises.push(fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=fr-FR&page=${i}`).then(r => r.json()));
            fetchPromises.push(fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=fr-FR&page=${i}`).then(r => r.json()));
         }
+        
+        // Specific requests for must-have titles (like Family Guy)
+        const specificTitles = ["Family Guy", "The Simpsons", "Rick and Morty", "South Park", "Braveheart", "Gladiator", "Matrix"];
+        specificTitles.forEach(t => {
+            fetchPromises.push(fetch(`https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(t)}`).then(r => r.json()));
+        });
         
         contentDB = [];
         const responses = await Promise.all(fetchPromises);
@@ -1254,12 +1298,14 @@
 
       // Define standard rows
       const sections = [
-          { title: translations[currentLang].section_trending, items: contentDB.slice(0, 20) },
-          { title: translations[currentLang].nav_series, items: contentDB.filter(i => i.type === 'series').slice(0, 20) },
-          { title: translations[currentLang].nav_movies, items: contentDB.filter(i => i.type === 'movie').slice(0, 20) },
-          { title: translations[currentLang].Anime, items: contentDB.filter(i => i.genre.includes('Anime')).slice(0, 20) },
-          { title: translations[currentLang].Documentary, items: contentDB.filter(i => i.genre.includes('Documentary')).slice(0, 20) },
-          { title: translations[currentLang].Action, items: contentDB.filter(i => i.genre.includes('Action')).slice(0, 20) }
+          { title: translations[currentLang].section_trending, items: contentDB.slice(0, 40) },
+          { title: "Animation & Adult Comedy", items: contentDB.filter(i => i.genre.includes('Animation') || i.genre.includes('Family')).slice(0, 40) },
+          { title: translations[currentLang].nav_series, items: contentDB.filter(i => i.type === 'series').slice(0, 40) },
+          { title: translations[currentLang].nav_movies, items: contentDB.filter(i => i.type === 'movie').slice(0, 40) },
+          { title: translations[currentLang].Action, items: contentDB.filter(i => i.genre.includes('Action')).slice(0, 40) },
+          { title: translations[currentLang].SciFi, items: contentDB.filter(i => i.genre.includes('SciFi')).slice(0, 40) },
+          { title: "Horreur & Suspense", items: contentDB.filter(i => i.genre.includes('Horror') || i.genre.includes('Thriller')).slice(0, 40) },
+          { title: translations[currentLang].Comedy, items: contentDB.filter(i => i.genre.includes('Comedy')).slice(0, 40) }
       ];
 
       sections.forEach(sec => {
@@ -1280,12 +1326,24 @@
         const inner = document.createElement('div');
         inner.className = 'row-inner';
         
+        const btnPrev = document.createElement('button');
+        btnPrev.className = 'row-nav-btn prev';
+        btnPrev.innerHTML = '&#10094;';
+        btnPrev.onclick = () => { inner.scrollLeft -= 500; };
+        
+        const btnNext = document.createElement('button');
+        btnNext.className = 'row-nav-btn next';
+        btnNext.innerHTML = '&#10095;';
+        btnNext.onclick = () => { inner.scrollLeft += 500; };
+        
         items.forEach(item => {
             inner.appendChild(createCard(item));
         });
         
         row.appendChild(titleEl);
+        row.appendChild(btnPrev);
         row.appendChild(inner);
+        row.appendChild(btnNext);
         return row;
     }
 
