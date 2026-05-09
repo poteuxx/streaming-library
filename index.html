@@ -627,11 +627,11 @@
           <div class="server-selector">
             <label for="serverSelect" data-i18n="label_server">Serveur:</label>
             <select id="serverSelect" class="server-select" onchange="changeServer()">
-              <option value="cc" data-i18n="server_auto">Serveur 1 (Vidsrc.cc)</option>
+              <option value="ae" data-i18n="server_auto">Serveur 1 (AutoEmbed Sans-Pub)</option>
               <option value="me">Serveur 2 (VidSrc.me)</option>
-              <option value="ae">Serveur 3 (AutoEmbed)</option>
-              <option value="net">Serveur 4 (Vidsrc.net)</option>
-              <option value="to">Serveur 5 (Vidsrc.to)</option>
+              <option value="net">Serveur 3 (Vidsrc.net)</option>
+              <option value="to">Serveur 4 (Vidsrc.to)</option>
+              <option value="cc">Serveur 5 (Vidsrc.cc - Strict)</option>
             </select>
           </div>
         </div>
@@ -639,8 +639,9 @@
       </div>
 
       <div class="iframe-container">
-        <!-- Sandbox removed: Streaming providers actively block playback if a sandbox is detected -->
+        <!-- Ultra-Strict Sandbox: explicitly MISSING 'allow-popups' to permanently kill malicious ad tabs -->
         <iframe id="playerIframe" 
+                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                 allowfullscreen 
                 src="">
         </iframe>
@@ -987,23 +988,21 @@
             
             // Construct robust, universally working players across multiple totally isolated hosts
             if (item.type === "series" || match.media_type === "tv") {
-               // Removing explicit season/episode parameters allows the embed providers' built-in Netflix-style
-               // episode selectors and 'autoplay next' logic to activate automatically!
-               item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}`;
-               item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}`;
                item.servers.ae = `https://autoembed.to/tv/tmdb/${tmdbId}`;
+               item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/tv/${tmdbId}`;
+               item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}`;
             } else {
-               item.servers.cc = `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
-               item.servers.me = `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
                item.servers.ae = `https://autoembed.to/movie/tmdb/${tmdbId}`;
+               item.servers.me = `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/movie?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/movie/${tmdbId}`;
+               item.servers.cc = `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
             }
             
-            // Set default server to cc
-            item.servers.auto = item.servers.cc;
+            // Set default server to AutoEmbed (most sandbox-friendly)
+            item.servers.auto = item.servers.ae;
           } else {
              item.servers.auto = "error";
           }
@@ -1013,7 +1012,7 @@
       }
 
       document.getElementById('playerTitle').innerText = item.title;
-      serverSelect.value = 'cc';
+      serverSelect.value = 'ae';
       updatePlayerSource();
     }
 
