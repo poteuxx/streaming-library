@@ -101,26 +101,27 @@
     left: 50%;
     transform: translateX(-50%) scaleY(1.3);
     text-align: center;
-    color: #ffffff;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 900;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     text-transform: uppercase;
     line-height: 0.95;
     letter-spacing: 1.5px;
-    /* Netflix 3D Style: Crisp extruded red shadow, not blurry neon */
-    text-shadow: 
-      0.5px 0.5px 0 #e50914,
-      1px 1px 0 #e50914,
-      1.5px 1.5px 0 #b20710,
-      2px 2px 0 #b20710,
-      3px 3px 5px rgba(0, 0, 0, 0.8);
+    
+    /* Netflix Multiple Red Colors */
+    background: linear-gradient(to bottom, #ff1e27 0%, #e50914 45%, #83040a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #e50914; 
+    
+    /* Drop shadow instead of text-shadow so it works with gradient text */
+    filter: drop-shadow(0px 3px 4px rgba(0, 0, 0, 0.9));
     pointer-events: none;
     z-index: 10;
   }
   .main-brand-logo span {
     font-size: 11px;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
   }
 
   /* SEARCH BARR */
