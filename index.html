@@ -99,15 +99,26 @@
   .main-brand-logo {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%) scaleY(1.15);
+    transform: translateX(-50%) scaleY(1.35);
+    text-align: center;
     color: #ffffff;
-    font-size: 26px;
+    font-size: 15px;
     font-weight: 900;
+    font-family: 'Impact', 'Arial Black', sans-serif;
     text-transform: uppercase;
-    letter-spacing: -0.5px;
-    text-shadow: 0 0 10px rgba(229, 9, 20, 0.9), 0 0 20px rgba(229, 9, 20, 0.7), 0 0 5px #e50914;
-    pointer-events: none; /* Passes clicks through */
+    line-height: 0.9;
+    letter-spacing: 2px;
+    text-shadow: 
+      0 0 10px rgba(229, 9, 20, 1), 
+      0 0 20px rgba(229, 9, 20, 0.8), 
+      0 0 35px rgba(229, 9, 20, 0.5),
+      1px 1px 0px #e50914;
+    pointer-events: none;
     z-index: 10;
+  }
+  .main-brand-logo span {
+    font-size: 11px;
+    letter-spacing: 0.5px;
   }
 
   /* SEARCH BARR */
@@ -552,7 +563,7 @@
       </nav>
     </div>
     
-    <div class="main-brand-logo">SolutionsTechnologie</div>
+    <div class="main-brand-logo">SOLUTIONS<br><span>TECHNOLOGIES</span></div>
     
     <div class="nav-right">
       <div class="search-container">
