@@ -643,26 +643,26 @@
 
   .server-grid {
     display: flex;
-    gap: 10px;
+    gap: 6px;
     overflow-x: auto;
-    padding: 15px 20px;
-    background: rgba(0,0,0,0.3);
+    padding: 10px 15px;
+    background: rgba(0,0,0,0.4);
     scrollbar-width: thin;
-    scrollbar-color: #444 transparent;
+    scrollbar-color: #E50914 transparent;
   }
 
   .server-btn {
     flex: 0 0 auto;
-    background: #242424;
+    background: #181818;
     border: 1px solid rgba(255,255,255,0.1);
     color: #e5e5e5;
-    padding: 10px 18px;
+    padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 9.5px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     transition: all 0.2s ease;
     white-space: nowrap;
   }
@@ -682,13 +682,13 @@
     background: var(--netflix-red);
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 6px 10px;
     border-radius: 4px;
-    font-size: 11px;
-    font-weight: 800;
+    font-size: 9.5px;
+    font-weight: 900;
     cursor: pointer;
     text-transform: uppercase;
-    margin-left: 20px;
+    margin-left: 10px;
     transition: 0.3s;
     flex-shrink: 0;
   }
@@ -1524,22 +1524,22 @@
         grid.innerHTML = '';
         
         const svs = [
-            { id: 'vl', label: 'Serveur 1 (VF/VOSTFR)' },
-            { id: 'vl2', label: 'Serveur 2 (Auto Multi)' },
-            { id: 'darki', label: 'Serveur 3 (Exclu FR)' },
-            { id: 'autoembedto', label: 'Serveur 4 (Auto FR)' },
-            { id: 'xyz', label: 'Serveur 5 (VidSrc.xyz)' },
-            { id: 'icu', label: 'Serveur 6 (VidSrc.icu)' },
-            { id: 'su', label: 'Serveur 7 (VidSrc.su)' },
-            { id: 'me', label: 'Serveur 8 (VidSrc.me)' },
-            { id: 'to', label: 'Serveur 9 (VidSrc.to)' },
-            { id: 'link', label: 'Serveur 10 (VidSrc.link)' },
-            { id: 'top', label: 'Serveur 11 (VidSrc.top)' },
-            { id: 'super', label: 'Serveur 12 (SuperEmbed)' },
-            { id: 'multiembed', label: 'Serveur 13 (MultiEmbed)' },
-            { id: 'vidlink', label: 'Serveur 14 (VidLink.pro)' },
-            { id: 'embedsu', label: 'Serveur 15 (Embed.su)' },
-            { id: 'smashy', label: 'Serveur 16 (Smashy)' }
+            { id: 'vl', label: 'S1 • VF/VOST' },
+            { id: 'vl2', label: 'S2 • AUTO FR' },
+            { id: 'darki', label: 'S3 • EXCLU FR' },
+            { id: 'autoembedto', label: 'S4 • FR/MULTI' },
+            { id: 'xyz', label: 'S5 • VIDSRC.XYZ' },
+            { id: 'icu', label: 'S6 • VIDSRC.ICU' },
+            { id: 'su', label: 'S7 • VIDSRC.SU' },
+            { id: 'me', label: 'S8 • VIDSRC.ME' },
+            { id: 'to', label: 'S9 • VIDSRC.TO' },
+            { id: 'link', label: 'S10 • VIDSRC.LINK' },
+            { id: 'top', label: 'S11 • VIDSRC.TOP' },
+            { id: 'super', label: 'S12 • SUPEREMBED' },
+            { id: 'multiembed', label: 'S13 • MULTI' },
+            { id: 'vidlink', label: 'S14 • VIDLINK' },
+            { id: 'embedsu', label: 'S15 • EMBED.SU' },
+            { id: 'smashy', label: 'S16 • SMASHY' }
         ];
         
         svs.forEach(s => {
