@@ -627,11 +627,10 @@
           <div class="server-selector">
             <label for="serverSelect" data-i18n="label_server">Serveur:</label>
             <select id="serverSelect" class="server-select" onchange="changeServer()">
-              <option value="ae" data-i18n="server_auto">Serveur 1 (AutoEmbed Sans-Pub)</option>
-              <option value="me">Serveur 2 (VidSrc.me)</option>
-              <option value="net">Serveur 3 (Vidsrc.net)</option>
-              <option value="to">Serveur 4 (Vidsrc.to)</option>
-              <option value="cc">Serveur 5 (Vidsrc.cc - Strict)</option>
+              <option value="me" data-i18n="server_auto">Serveur 1 (VidSrc.me)</option>
+              <option value="net">Serveur 2 (VidSrc.net)</option>
+              <option value="to">Serveur 3 (VidSrc.to)</option>
+              <option value="cc">Serveur 4 (VidSrc.cc - Strict)</option>
             </select>
           </div>
         </div>
@@ -639,9 +638,9 @@
       </div>
 
       <div class="iframe-container">
-        <!-- Ultra-Strict Sandbox: explicitly MISSING 'allow-popups' to permanently kill malicious ad tabs -->
+        <!-- Sandbox removed so native player controls (CC, Settings, Fullscreen) are clickable. -->
+        <!-- Note: Free ad-supported streams will have popups. Use an Adblocker browser extension for a clean experience! -->
         <iframe id="playerIframe" 
-                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                 allowfullscreen 
                 src="">
         </iframe>
@@ -744,70 +743,72 @@
     const proxy = 'https://api.allorigins.win/get?url=';
     const baseUrl = 'https://www.hdss.art';
 
-    async function fetchHDSSData() {
+    async function fetchCatalogData() {
       try {
-        console.log("Fetching HDSS full catalog...");
-        document.getElementById('heroTitle').innerText = "Chargement Séries & Films HDSS...";
+        console.log("Fetching TMDB catalog...");
+        document.getElementById('heroTitle').innerText = "Chargement Séries & Films...";
         
-        const urlsToScrape = [
-           'https://www.hdss.art/films/',
-           'https://www.hdss.art/series/'
-        ];
+        const apiKey = "15d2ea6d0dc1d476efbca3eba2b9bbfb";
+        const movieUrl = `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}&language=fr-FR`;
+        const tvUrl = `https://api.themoviedb.org/3/trending/tv/week?api_key=${apiKey}&language=fr-FR`;
         
         contentDB = [];
-        const parser = new DOMParser();
+        
+        const [movieRes, tvRes] = await Promise.all([
+           fetch(movieUrl).then(r => r.json()),
+           fetch(tvUrl).then(r => r.json())
+        ]);
 
-        for (let url of urlsToScrape) {
-          try {
-            const response = await fetch(proxy + encodeURIComponent(url));
-            const data = await response.json();
-            const doc = parser.parseFromString(data.contents, 'text/html');
-            const articles = doc.querySelectorAll('article.short-item');
-            
-            articles.forEach((art) => {
-              const a = art.querySelector('a.short-item__img');
-              const img = art.querySelector('img');
-              const title = art.querySelector('h3.short-item__title');
-              
-              if(a && img && title) {
-                let imgUrl = img.getAttribute('src');
-                if(imgUrl.startsWith('/')) imgUrl = baseUrl + imgUrl;
-                
-                let linkUrl = a.getAttribute('href');
-                if(linkUrl.startsWith('/')) linkUrl = baseUrl + linkUrl;
-
-                let type = url.includes('/series/') ? "series" : "movie";
-
-                contentDB.push({
-                  id: contentDB.length,
-                  type: type,
-                  title: title.innerText.trim(),
-                  desc: { fr: "Profitez du contenu complet sans interruption.", en: "Enjoy full content uninterrupted." },
-                  genre: ["Action"], 
-                  thumb: imgUrl,
-                  backdrop: imgUrl, 
-                  link: linkUrl,
-                  year: new Date().getFullYear(),
-                  servers: { auto: null }
-                });
-              }
-            });
-          } catch(e) {
-            console.error("Erreur lors de la pagination:", url);
-          }
+        let combined = [];
+        
+        if (movieRes.results) {
+           movieRes.results.forEach(m => {
+              combined.push({
+                 id: contentDB.length + combined.length,
+                 tmdbId: m.id,
+                 type: "movie",
+                 title: m.title || m.original_title,
+                 desc: { fr: m.overview || "Aucune description.", en: m.overview || "No description." },
+                 genre: ["Action"], // can map real genres later
+                 thumb: `https://image.tmdb.org/t/p/w500${m.poster_path}`,
+                 backdrop: `https://image.tmdb.org/t/p/original${m.backdrop_path}`,
+                 year: m.release_date ? m.release_date.split('-')[0] : new Date().getFullYear(),
+                 servers: { auto: null }
+              });
+           });
         }
 
+        if (tvRes.results) {
+           tvRes.results.forEach(t => {
+              combined.push({
+                 id: contentDB.length + combined.length,
+                 tmdbId: t.id,
+                 type: "series",
+                 title: t.name || t.original_name,
+                 desc: { fr: t.overview || "Aucune description.", en: t.overview || "No description." },
+                 genre: ["Action"], 
+                 thumb: `https://image.tmdb.org/t/p/w500${t.poster_path}`,
+                 backdrop: `https://image.tmdb.org/t/p/original${t.backdrop_path}`,
+                 year: t.first_air_date ? t.first_air_date.split('-')[0] : new Date().getFullYear(),
+                 servers: { auto: null }
+              });
+           });
+        }
+        
+        // Shuffle the array to mix movies and series
+        combined = combined.sort(() => Math.random() - 0.5);
+        contentDB = combined;
+
         if(contentDB.length > 0) {
-          console.log(`Loaded ${contentDB.length} items from HDSS`);
-          // Shuffle slightly to mix series and films if we want, or keep order.
+          console.log(`Loaded ${contentDB.length} items from TMDB`);
           setHeroMovi(contentDB[0]);
           renderGenres();
           renderGrid();
         }
 
       } catch (err) {
-        console.error("HDSS Scrape Error:", err);
-        document.getElementById('heroDesc').innerText = "Erreur proxy HDSS.";
+        console.error("Catalog Fetch Error:", err);
+        document.getElementById('heroDesc').innerText = "Erreur de connexion au catalogue (TMDB).";
       }
     }
 
@@ -824,7 +825,7 @@
       setLanguage('fr');
       // Initially clear grid
       document.getElementById('grid').innerHTML = '';
-      fetchHDSSData();
+      fetchCatalogData();
     }
 
     function setHeroMovi(item) {
@@ -978,41 +979,30 @@
 
       if (!item.servers.auto || item.servers.auto === "error") {
         try {
-          // By API mapping the scraped HDSS title, we guarantee a working iframe from an external source!
-          const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&query=${encodeURIComponent(item.title)}&language=fr-FR`);
-          const tmdbData = await tmdbRes.json();
-          
-          if(tmdbData.results && tmdbData.results.length > 0) {
-            const match = tmdbData.results[0]; // first best match
-            const tmdbId = match.id;
+            const tmdbId = item.tmdbId;
             
             // Construct robust, universally working players across multiple totally isolated hosts
-            if (item.type === "series" || match.media_type === "tv") {
-               item.servers.ae = `https://autoembed.to/tv/tmdb/${tmdbId}`;
+            if (item.type === "series") {
                item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/tv/${tmdbId}`;
                item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}`;
             } else {
-               item.servers.ae = `https://autoembed.to/movie/tmdb/${tmdbId}`;
                item.servers.me = `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/movie?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/movie/${tmdbId}`;
                item.servers.cc = `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
             }
             
-            // Set default server to AutoEmbed (most sandbox-friendly)
-            item.servers.auto = item.servers.ae;
-          } else {
-             item.servers.auto = "error";
-          }
+            // Set default server
+            item.servers.auto = item.servers.me;
         } catch(e) {
            item.servers.auto = "error";
         }
       }
 
       document.getElementById('playerTitle').innerText = item.title;
-      serverSelect.value = 'ae';
+      serverSelect.value = 'me';
       updatePlayerSource();
     }
 
