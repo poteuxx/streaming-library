@@ -643,6 +643,7 @@
         <!-- Note: Free ad-supported streams will have popups. Use an Adblocker browser extension for a clean experience! -->
         <iframe id="playerIframe" 
                 allowfullscreen 
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
                 src="">
         </iframe>
       </div>
@@ -984,13 +985,13 @@
             
             // Construct robust, universally working players across multiple totally isolated hosts
             if (item.type === "series") {
-               item.servers.vl = `https://vidlink.pro/tv/${tmdbId}`;
+               item.servers.vl = `https://autoembed.co/tv/tmdb/${tmdbId}`;
                item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/tv/${tmdbId}`;
                item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}`;
             } else {
-               item.servers.vl = `https://vidlink.pro/movie/${tmdbId}`;
+               item.servers.vl = `https://autoembed.co/movie/tmdb/${tmdbId}`;
                item.servers.me = `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/movie?tmdb=${tmdbId}`;
                item.servers.to = `https://vidsrc.to/embed/movie/${tmdbId}`;
