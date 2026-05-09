@@ -678,6 +678,26 @@
     border-color: white;
   }
 
+  .repair-btn {
+    background: var(--netflix-red);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-left: 20px;
+    transition: 0.3s;
+    flex-shrink: 0;
+  }
+
+  .repair-btn:hover {
+    background: #ff0000;
+    transform: scale(1.05);
+  }
+
   .iframe-container {
     width: 100%;
     aspect-ratio: 16 / 9;
@@ -824,34 +844,13 @@
       <div class="player-header">
         <div class="player-title-area">
           <h2 id="playerTitle">Film Title</h2>
-          <div class="server-selector">
-            <label for="serverSelect" data-i18n="label_server">Serveur:</label>
-            <select id="serverSelect" class="server-select" onchange="changeServer()">
-              <option value="vl" data-i18n="server_auto">Serveur 1 (VF / VOSTFR - Haute Qualité)</option>
-              <option value="vl2">Serveur 2 (AutoEmbed Multi-Audio FR)</option>
-              <option value="darki">Serveur 3 (Exclusivité FR / DarkiWorld)</option>
-              <option value="autoembedto">Serveur 4 (AutoEmbed.to - Multi/FR)</option>
-              <option value="xyz">Serveur 5 (VidSrc.xyz - Multilingue/VOSTFR)</option>
-              <option value="icu">Serveur 6 (VidSrc.icu - Multi/VOSTFR)</option>
-              <option value="su">Serveur 7 (VidSrc.su - Multi/VOSTFR)</option>
-              <option value="me">Serveur 8 (VidSrc.me - VOSTFR/EN)</option>
-              <option value="net">Serveur 9 (VidSrc.net - VOSTFR/EN)</option>
-              <option value="to">Serveur 10 (VidSrc.to - VOSTFR/EN)</option>
-              <option value="pm">Serveur 11 (VidSrc.pm - VOSTFR/EN)</option>
-              <option value="in">Serveur 12 (VidSrc.in - VOSTFR/EN)</option>
-              <option value="multiembed">Serveur 13 (MultiEmbed.mov - VOSTFR/EN)</option>
-              <option value="vidlink">Serveur 14 (VidLink.pro - VOSTFR/EN)</option>
-              <option value="embedsu">Serveur 15 (Embed.su - VOSTFR/EN)</option>
-              <option value="smashy">Serveur 16 (SmashyStream - Multi/EN)</option>
-              <option value="vidbinge">Serveur 17 (VidBinge - Multi/EN)</option>
-              <option value="stream">Serveur 18 (VidSrc.stream - VOSTFR/EN)</option>
-              <option value="vip">Serveur 19 (VidSrc.vip - EN)</option>
-              <option value="nl">Serveur 20 (VidSrc.nl - EN)</option>
-              <option value="twoembed">Serveur 21 (2Embed.cc - VOSTFR/EN)</option>
-              <option value="gdrive">Serveur 22 (GDrivePlayer - EN)</option>
-            </select>
+          <div style="display: flex; align-items: center; width: 100%;">
+              <div id="serverGrid" class="server-grid" style="flex-grow: 1;">
+                <!-- Server buttons injected here -->
+              </div>
           </div>
         </div>
+        <button class="repair-btn" onclick="autoRepairServer()">Réparer le flux</button>
         <button class="modal-close" style="position: static;" onclick="closePlayerModal()">×</button>
       </div>
 
@@ -1485,7 +1484,7 @@
 
       document.getElementById('playerTitle').innerText = item.title;
       renderServerGrid();
-      updatePlayerSource('vl');
+      let iS = (activeMovie && activeMovie.genre.includes('Anime')) ? 'xyz' : (activeMovie && activeMovie.type === 'series' ? 'to' : 'vl'); updatePlayerSource(iS);
     }
 
     function closePlayerModal() {
@@ -1499,7 +1498,7 @@
       }, 300);
     }
 
-    function changeServer() { updatePlayerSource('vl'); }
+    function changeServer() { let iS = (activeMovie && activeMovie.genre.includes('Anime')) ? 'xyz' : (activeMovie && activeMovie.type === 'series' ? 'to' : 'vl'); updatePlayerSource(iS); }
 
     function renderServerGrid() {
         const grid = document.getElementById('serverGrid');
@@ -1534,6 +1533,12 @@
             };
             grid.appendChild(btn);
         });
+    }
+
+    function autoRepairServer() {
+        const priority = ['vl', 'vl2', 'darki', 'xyz', 'icu', 'su', 'link', 'top', 'super'];
+        let idx = priority.indexOf(currentServer);
+        updatePlayerSource(priority[(idx + 1) % priority.length]);
     }
 
     let currentServer = 'vl';
