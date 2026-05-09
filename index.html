@@ -641,6 +641,12 @@
               <option value="vidlink">Serveur 12 (VidLink.pro - VOSTFR/EN)</option>
               <option value="embedsu">Serveur 13 (Embed.su - VOSTFR/EN)</option>
               <option value="twoembed">Serveur 14 (2Embed.cc - VOSTFR/EN)</option>
+              <option value="smashy">Serveur 15 (SmashyStream - Multi/EN)</option>
+              <option value="vidbinge">Serveur 16 (VidBinge - Multi/EN)</option>
+              <option value="gdrive">Serveur 17 (GDrivePlayer - EN)</option>
+              <option value="autoembedto">Serveur 18 (AutoEmbed.to - Multi/FR)</option>
+              <option value="vip">Serveur 19 (VidSrc.vip - EN)</option>
+              <option value="nl">Serveur 20 (VidSrc.nl - EN)</option>
             </select>
           </div>
         </div>
@@ -1006,6 +1012,12 @@
                item.servers.vidlink = `https://vidlink.pro/tv/${tmdbId}/1/1`;
                item.servers.embedsu = `https://embed.su/embed/tv/${tmdbId}/1/1`;
                item.servers.twoembed = `https://2embed.cc/embedtv/${tmdbId}&s=1&e=1`;
+               item.servers.smashy = `https://player.smashy.stream/tv?tmdb=${tmdbId}&s=1&e=1`;
+               item.servers.vidbinge = `https://vidbinge.dev/embed/tv/${tmdbId}/1/1`;
+               item.servers.gdrive = `https://database.gdriveplayer.us/player.php?type=series&tmdb=${tmdbId}&season=1&episode=1`;
+               item.servers.autoembedto = `https://autoembed.to/tv/tmdb/${tmdbId}?lang=fr`;
+               item.servers.vip = `https://vidsrc.vip/embed/tv/${tmdbId}`;
+               item.servers.nl = `https://vidsrc.nl/embed/tv/${tmdbId}`;
             } else {
                item.servers.vl = `https://frembed.pro/api/film.php?id=${tmdbId}`;
                item.servers.vl2 = `https://autoembed.co/movie/tmdb/${tmdbId}?lang=fr`;
@@ -1021,6 +1033,12 @@
                item.servers.vidlink = `https://vidlink.pro/movie/${tmdbId}`;
                item.servers.embedsu = `https://embed.su/embed/movie/${tmdbId}`;
                item.servers.twoembed = `https://2embed.cc/embed/${tmdbId}`;
+               item.servers.smashy = `https://player.smashy.stream/movie?tmdb=${tmdbId}`;
+               item.servers.vidbinge = `https://vidbinge.dev/embed/movie/${tmdbId}`;
+               item.servers.gdrive = `https://database.gdriveplayer.us/player.php?tmdb=${tmdbId}`;
+               item.servers.autoembedto = `https://autoembed.to/movie/tmdb/${tmdbId}?lang=fr`;
+               item.servers.vip = `https://vidsrc.vip/embed/movie/${tmdbId}`;
+               item.servers.nl = `https://vidsrc.nl/embed/movie/${tmdbId}`;
             }
             
             // Set default server
