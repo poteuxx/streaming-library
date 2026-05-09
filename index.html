@@ -628,8 +628,10 @@
             <label for="serverSelect" data-i18n="label_server">Serveur:</label>
             <select id="serverSelect" class="server-select" onchange="changeServer()">
               <option value="cc" data-i18n="server_auto">Serveur 1 (Vidsrc.cc)</option>
-              <option value="net">Serveur 2 (Vidsrc.net)</option>
-              <option value="su">Serveur 3 (Embed.su)</option>
+              <option value="me">Serveur 2 (VidSrc.me)</option>
+              <option value="ae">Serveur 3 (AutoEmbed)</option>
+              <option value="net">Serveur 4 (Vidsrc.net)</option>
+              <option value="to">Serveur 5 (Vidsrc.to)</option>
             </select>
           </div>
         </div>
@@ -983,18 +985,22 @@
             const match = tmdbData.results[0]; // first best match
             const tmdbId = match.id;
             
-            // Construct robust, universally working players across multiple hosts
+            // Construct robust, universally working players across multiple totally isolated hosts
             if (item.type === "series" || match.media_type === "tv") {
                item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}/1/1`;
+               item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=1&episode=1`;
+               item.servers.ae = `https://autoembed.to/tv/tmdb/${tmdbId}-1-1`;
                item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}&season=1&episode=1`;
-               item.servers.su = `https://embed.su/embed/tv/${tmdbId}/1/1`;
+               item.servers.to = `https://vidsrc.to/embed/tv/${tmdbId}/1/1`;
             } else {
                item.servers.cc = `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
+               item.servers.me = `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
+               item.servers.ae = `https://autoembed.to/movie/tmdb/${tmdbId}`;
                item.servers.net = `https://vidsrc.net/embed/movie?tmdb=${tmdbId}`;
-               item.servers.su = `https://embed.su/embed/movie/${tmdbId}`;
+               item.servers.to = `https://vidsrc.to/embed/movie/${tmdbId}`;
             }
             
-            // Set default server to cc since it clears French ISP blocks
+            // Set default server to cc
             item.servers.auto = item.servers.cc;
           } else {
              item.servers.auto = "error";
