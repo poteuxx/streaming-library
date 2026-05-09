@@ -223,7 +223,7 @@
     background-position: center;
     display: flex;
     align-items: flex-end;
-    padding: 80px 40px;
+    padding: 80px 40px 150px; /* Increased bottom padding to avoid overlap with rows */
     transition: background-image 1s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
   }
@@ -259,6 +259,7 @@
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
