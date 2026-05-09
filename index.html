@@ -736,100 +736,72 @@
     }
 
     /* =========================================
-       MOCK DATABASE (Mimicking HDSS Architecture)
+       DYNAMIC HDSS SCRAPER (CORS PROXY)
        ========================================= */
-    const contentDB = [
-      {
-        id: 1,
-        type: "series",
-        title: "Cyberpunk: Edgerunners",
-        desc: {
-          fr: "Dans une dystopie corrompue par la cybernétique, un jeune de la rue talentueux et impulsif s'efforce de devenir mercenaire.",
-          en: "In a dystopia riddled with corruption and cybernetic implants, a talented but reckless street kid strives to become a mercenary outlaw."
-        },
-        genre: ["SciFi", "Animation", "Action"],
-        thumb: "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?w=600&q=80",
-        backdrop: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1600&q=80",
-        servers: {
-          auto: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Ex: Your HDSS iframe URL goes here
-          fr: "https://www.youtube.com/embed/dQw4w9WgXcQ?hl=fr",
-          en: "https://www.youtube.com/embed/dQw4w9WgXcQ?hl=en"
-        },
-        year: 2022
-      },
-      {
-        id: 2,
-        type: "movie",
-        title: "Neon Nights",
-        desc: {
-          fr: "Un détective enquête sur une série de crimes mystérieux dans les néons de Tokyo.",
-          en: "A detective investigates a series of mysterious crimes under the neon lights of Tokyo."
-        },
-        genre: ["Action", "Drama"],
-        thumb: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=600&q=80",
-        backdrop: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=1600&q=80",
-        servers: {
-          auto: "https://www.youtube.com/embed/tgbNymZ7vqY",
-          fr: "https://www.youtube.com/embed/tgbNymZ7vqY?hl=fr",
-          en: "https://www.youtube.com/embed/tgbNymZ7vqY?hl=en"
-        },
-        year: 2024
-      },
-      {
-        id: 3,
-        type: "movie",
-        title: "Laugh Riot",
-        desc: {
-          fr: "La comédie de l'année. Un groupe d'amis part en voyage.",
-          en: "The comedy of the year. A group of friends go on a roadtrip."
-        },
-        genre: ["Comedy"],
-        thumb: "https://images.unsplash.com/photo-1527228113540-1e5f8f55331e?w=600&q=80",
-        backdrop: "https://images.unsplash.com/photo-1527228113540-1e5f8f55331e?w=1600&q=80",
-        servers: {
-          auto: "https://www.youtube.com/embed/tgbNymZ7vqY",
-          fr: "https://www.youtube.com/embed/tgbNymZ7vqY",
-          en: "https://www.youtube.com/embed/tgbNymZ7vqY"
-        },
-        year: 2023
-      },
-       {
-        id: 4,
-        type: "movie",
-        title: "Deep Space",
-        desc: {
-          fr: "Au delà des étoiles, l'inconnu terrifiant.",
-          en: "Beyond the stars, the terrifying unknown."
-        },
-        genre: ["SciFi", "Horror"],
-        thumb: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=600&q=80",
-        backdrop: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1600&q=80",
-        servers: {
-          auto: "https://www.youtube.com/embed/tgbNymZ7vqY",
-          fr: "https://www.youtube.com/embed/tgbNymZ7vqY",
-          en: "https://www.youtube.com/embed/tgbNymZ7vqY"
-        },
-        year: 2021
-      },
-      {
-        id: 5,
-        type: "series",
-        title: "Urban Samurai",
-        desc: {
-          fr: "Une vengeance au coeur de la ville.",
-          en: "Revenge in the heart of the city."
-        },
-        genre: ["Action"],
-        thumb: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=600&q=80",
-        backdrop: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=1600&q=80",
-        servers: {
-          auto: "https://www.youtube.com/embed/tgbNymZ7vqY",
-          fr: "https://www.youtube.com/embed/tgbNymZ7vqY",
-          en: "https://www.youtube.com/embed/tgbNymZ7vqY"
-        },
-        year: 2025
+    let contentDB = [];
+    const proxy = 'https://api.allorigins.win/get?url=';
+    const baseUrl = 'https://www.hdss.art';
+
+    async function fetchHDSSData() {
+      try {
+        console.log("Fetching HDSS home...");
+        document.getElementById('heroTitle').innerText = translations[currentLang].btn_play === "Play" ? "Loading HDSS Catalog..." : "Chargement du catalogue HDSS...";
+        
+        const response = await fetch(proxy + encodeURIComponent(baseUrl));
+        const data = await response.json();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+        
+        const articles = doc.querySelectorAll('article.short-item');
+        contentDB = [];
+
+        articles.forEach((art, index) => {
+          const a = art.querySelector('a.short-item__img');
+          const img = art.querySelector('img');
+          const title = art.querySelector('h3.short-item__title');
+          
+          if(a && img && title) {
+            let imgUrl = img.getAttribute('src');
+            if(imgUrl.startsWith('/')) imgUrl = baseUrl + imgUrl;
+            
+            let linkUrl = a.getAttribute('href');
+            if(linkUrl.startsWith('/')) linkUrl = baseUrl + linkUrl;
+
+            // Guess type from url (series vs film)
+            let type = "movie";
+            if(linkUrl.includes('/series/')) type = "series";
+
+            contentDB.push({
+              id: index,
+              type: type,
+              title: title.innerText.trim(),
+              desc: {
+                fr: "Description disponible lors de la lecture sur HDSS.",
+                en: "Description available upon playing on HDSS."
+              },
+              genre: ["Action"], // Simplified for dynamic loading
+              thumb: imgUrl,
+              backdrop: imgUrl, // Fallback backdrop
+              link: linkUrl,
+              year: new Date().getFullYear(),
+              servers: { auto: null } // Fetched on demand
+            });
+          }
+        });
+
+        if(contentDB.length > 0) {
+          console.log(`Loaded ${contentDB.length} items from HDSS`);
+          setHeroMovi(contentDB[0]);
+          renderGenres();
+          renderGrid();
+        }
+
+      } catch (err) {
+        console.error("HDSS Scrape Error:", err);
+        document.getElementById('heroDesc').innerText = "Erreur de connexion au proxy HDSS.";
       }
-    ];
+    }
 
     /* =========================================
        STATE & RENDER LOGIC
@@ -842,9 +814,9 @@
 
     function init() {
       setLanguage('fr');
-      setHeroMovi(contentDB[0]);
-      renderGenres();
-      renderGrid();
+      // Initially clear grid
+      document.getElementById('grid').innerHTML = '';
+      fetchHDSSData();
     }
 
     function setHeroMovi(item) {
@@ -990,15 +962,37 @@
     const iframe = document.getElementById('playerIframe');
     const serverSelect = document.getElementById('serverSelect');
 
-    function openPlayerModal(item) {
+    async function openPlayerModal(item) {
       activeMovie = item;
-      document.getElementById('playerTitle').innerText = item.title;
-      
-      serverSelect.value = 'auto';
-      updatePlayerSource();
-      
+      document.getElementById('playerTitle').innerText = item.title + " (Loading Server...)";
       playerModal.classList.add('active');
       document.body.style.overflow = 'hidden';
+
+      if (!item.servers.auto) {
+        // Fetch specific movie page to extract iframe
+        try {
+          const res = await fetch(proxy + encodeURIComponent(item.link));
+          const data = await res.json();
+          const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+          
+          // Trying to locate HDSS video iframes (often inside .video-responsive or specific id)
+          const iframeEl = doc.querySelector('.video-responsive iframe') || doc.querySelector('iframe');
+          
+          if(iframeEl && iframeEl.src) {
+             let embedUrl = iframeEl.src;
+             if(embedUrl.startsWith('//')) embedUrl = 'https:' + embedUrl;
+             item.servers.auto = embedUrl;
+          } else {
+             item.servers.auto = "error";
+          }
+        } catch(e) {
+           item.servers.auto = "error";
+        }
+      }
+
+      document.getElementById('playerTitle').innerText = item.title;
+      serverSelect.value = 'auto';
+      updatePlayerSource();
     }
 
     function closePlayerModal() {
