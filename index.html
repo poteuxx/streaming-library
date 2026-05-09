@@ -905,32 +905,48 @@
       if(existingIframe) existingIframe.remove();
       clearTimeout(hero.trailerTimeout);
 
+      const attemptPlay = (trailer) => {
+          if (trailer) {
+              hero.trailerTimeout = setTimeout(() => {
+                   if (heroMovie.id === item.id) {
+                       const iframe = document.createElement('iframe');
+                       iframe.id = 'heroTrailer';
+                       iframe.style.position = 'absolute';
+                       iframe.style.inset = '-20%'; 
+                       iframe.style.width = '140%';
+                       iframe.style.height = '140%';
+                       iframe.style.border = 'none';
+                       iframe.style.zIndex = '1';
+                       iframe.style.opacity = '0';
+                       iframe.style.transition = 'opacity 1.5s ease';
+                       iframe.style.pointerEvents = 'none'; 
+                       iframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&loop=1&playlist=${trailer.key}`;
+                       
+                       iframe.onload = () => { iframe.style.opacity = '1'; };
+                       hero.appendChild(iframe);
+                   }
+              }, 800); 
+          }
+      };
+
+      // 1. Try French trailer first
       fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}/videos?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb&language=fr-FR`)
         .then(res => res.json())
         .then(data => {
             let trailer = data.results && data.results.find(v => v.site === "YouTube" && v.type === "Trailer");
-            if (!trailer && data.results) trailer = data.results.find(v => v.site === "YouTube"); 
+            if (!trailer && data.results && data.results.length > 0) trailer = data.results.find(v => v.site === "YouTube"); 
             
             if (trailer) {
-                hero.trailerTimeout = setTimeout(() => {
-                     if (heroMovie.id === item.id) {
-                         const iframe = document.createElement('iframe');
-                         iframe.id = 'heroTrailer';
-                         iframe.style.position = 'absolute';
-                         iframe.style.inset = '-20%'; 
-                         iframe.style.width = '140%';
-                         iframe.style.height = '140%';
-                         iframe.style.border = 'none';
-                         iframe.style.zIndex = '1';
-                         iframe.style.opacity = '0';
-                         iframe.style.transition = 'opacity 1.5s ease';
-                         iframe.style.pointerEvents = 'none'; 
-                         iframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&loop=1&playlist=${trailer.key}`;
-                         
-                         iframe.onload = () => { iframe.style.opacity = '1'; };
-                         hero.appendChild(iframe);
-                     }
-                }, 800); 
+                attemptPlay(trailer);
+            } else {
+                // 2. Fallback to English/International default
+                fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}/videos?api_key=15d2ea6d0dc1d476efbca3eba2b9bbfb`)
+                    .then(res => res.json())
+                    .then(data2 => {
+                        let trailer2 = data2.results && data2.results.find(v => v.site === "YouTube" && v.type === "Trailer");
+                        if (!trailer2 && data2.results && data2.results.length > 0) trailer2 = data2.results.find(v => v.site === "YouTube"); 
+                        attemptPlay(trailer2);
+                    }).catch(e => console.log(e));
             }
         }).catch(err => console.log("No trailer found", err));
     }
