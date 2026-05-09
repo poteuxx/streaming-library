@@ -987,11 +987,13 @@
             
             // Construct robust, universally working players across multiple totally isolated hosts
             if (item.type === "series" || match.media_type === "tv") {
-               item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}/1/1`;
-               item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}&season=1&episode=1`;
-               item.servers.ae = `https://autoembed.to/tv/tmdb/${tmdbId}-1-1`;
-               item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}&season=1&episode=1`;
-               item.servers.to = `https://vidsrc.to/embed/tv/${tmdbId}/1/1`;
+               // Removing explicit season/episode parameters allows the embed providers' built-in Netflix-style
+               // episode selectors and 'autoplay next' logic to activate automatically!
+               item.servers.cc = `https://vidsrc.cc/v2/embed/tv/${tmdbId}`;
+               item.servers.me = `https://vidsrc.me/embed/tv?tmdb=${tmdbId}`;
+               item.servers.ae = `https://autoembed.to/tv/tmdb/${tmdbId}`;
+               item.servers.net = `https://vidsrc.net/embed/tv?tmdb=${tmdbId}`;
+               item.servers.to = `https://vidsrc.to/embed/tv/${tmdbId}`;
             } else {
                item.servers.cc = `https://vidsrc.cc/v2/embed/movie/${tmdbId}`;
                item.servers.me = `https://vidsrc.me/embed/movie?tmdb=${tmdbId}`;
